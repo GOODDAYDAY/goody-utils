@@ -26,4 +26,6 @@ hs_err_pid*
 .gitignore
 *.iml
 .idea
-
+*/target
+*/.DS_Store
+.DS_Store
