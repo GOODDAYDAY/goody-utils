@@ -1,5 +1,7 @@
 package com.goody.utils.qianliang.annotation;
 
+import com.goody.utils.qianliang.processor.GetterAndSetterProcessor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@link com.goody.utils.qianliang.processor.ToJsonProcessor} annotation
+ * {@link GetterAndSetterProcessor} annotation
  *
  * @author Goody
  * @version 1.0, 2022/5/4
@@ -16,5 +18,5 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
-public @interface ToJson {
+public @interface GetterAndSetter {
 }

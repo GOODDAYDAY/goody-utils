@@ -1,15 +1,15 @@
 package com.goody.utils.baihao.pojo;
 
-import com.goody.utils.qianliang.annotation.ToJson;
+import com.goody.utils.qianliang.annotation.GetterAndSetter;
 
 /**
- * {@link ToJson} test
+ * {@link GetterAndSetter} test
  *
  * @author Goody
  * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
-@ToJson
+@GetterAndSetter
 public class QianLiang {
     private String name;
 

@@ -1,6 +1,6 @@
 package com.goody.utils.qianliang.processor;
 
-import com.goody.utils.qianliang.annotation.ToJson;
+import com.goody.utils.qianliang.annotation.GetterAndSetter;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
@@ -43,16 +43,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * {@link com.goody.utils.qianliang.annotation.ToJson} processor
+ * {@link GetterAndSetter} processor
  *
  * @author Goody
  * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
-@SupportedAnnotationTypes({"com.goody.utils.qianliang.annotation.ToJson"})
+@SupportedAnnotationTypes({"com.goody.utils.qianliang.annotation.GetterAndSetter"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-public class ToJsonProcessor extends AbstractProcessor {
+public class GetterAndSetterProcessor extends AbstractProcessor {
 
     /** javac trees */
     private JavacTrees trees;
@@ -84,7 +84,7 @@ public class ToJsonProcessor extends AbstractProcessor {
      */
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> annotation = roundEnv.getElementsAnnotatedWith(ToJson.class);
+        Set<? extends Element> annotation = roundEnv.getElementsAnnotatedWith(GetterAndSetter.class);
         annotation.stream().map(element -> trees.getTree(element))
                 // tree is the class input. Modify the JCTree to modify the method or argus
                 .forEach(tree -> tree.accept(new TreeTranslator() {
