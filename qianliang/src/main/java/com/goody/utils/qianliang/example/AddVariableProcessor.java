@@ -2,11 +2,9 @@ package com.goody.utils.qianliang.example;
 
 import com.goody.utils.qianliang.processor.BaseProcessor;
 import com.google.auto.service.AutoService;
-import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.List;
 
-import javax.annotation.Nonnull;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
@@ -26,14 +24,9 @@ import javax.lang.model.SourceVersion;
 public class AddVariableProcessor extends BaseProcessor<AddVariable> {
 
     @Override
-    @Nonnull
-    public List<JCTree> generate(JCTree.JCClassDecl jcClassDecl) {
-        JCTree.JCVariableDecl jcVariableDecl = treeMaker.VarDef(
-                treeMaker.Modifiers(Flags.PRIVATE),
-                names.fromString("age"),
-                treeMaker.Ident(names.fromString("String")),
-                null);
-
-        return List.of(jcVariableDecl);
+    protected List<JCTree> handleJCAssign(List<JCTree.JCAssign> jcAssign) {
+        // TODO(goody): 2022/5/5 it is hard to get correct value in Annotation.
+        // @Sl4J is a good example that generate specified value
+        return List.nil();
     }
 }

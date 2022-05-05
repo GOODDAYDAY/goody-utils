@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@link GetterAndSetterProcessor} annotation
+ * {@link AddMethodProcessor} annotation
  *
  * @author Goody
  * @version 1.0, 2022/5/4
@@ -17,5 +17,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
 @Deprecated
-public @interface GetterAndSetter {
+public @interface AddMethod {
 }

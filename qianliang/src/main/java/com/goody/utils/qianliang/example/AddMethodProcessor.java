@@ -4,7 +4,6 @@ import com.goody.utils.qianliang.processor.BaseProcessor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
-import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -19,59 +18,38 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Name;
 
-import javax.annotation.Nonnull;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.tools.Diagnostic;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * {@link GetterAndSetter} processor
+ * {@link AddMethod} processor
  *
  * @author Goody
  * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
-@SupportedAnnotationTypes({"com.goody.utils.qianliang.example.GetterAndSetter"})
+@SupportedAnnotationTypes({"com.goody.utils.qianliang.example.AddMethod"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 @Deprecated
-public class GetterAndSetterProcessor extends BaseProcessor<GetterAndSetter> {
+public class AddMethodProcessor extends BaseProcessor<AddMethod> {
 
-    /**
-     * subclass should implement this method to add method or variable or others
-     *
-     * @param jcClassDecl jcClassDecl
-     * @return new JCTree list
-     */
-    @Nonnull
     @Override
-    public List<JCTree> generate(JCTree.JCClassDecl jcClassDecl) {
-        Map<Name, JCTree.JCVariableDecl> treeMap =
-                jcClassDecl.defs.stream().filter(k -> k.getKind().equals(Tree.Kind.VARIABLE))
-                        .map(tree -> (JCTree.JCVariableDecl) tree)
-                        .collect(Collectors.toMap(JCTree.JCVariableDecl::getName, Function.identity()));
-        final JCTree[] jcTrees = treeMap.values()
-                .stream()
-                .flatMap(jcVariable -> {
-                    try {
-                        // add getter,setter methods
-                        return Stream.of(generateGetterMethod(jcVariable), generateSetterMethod(jcVariable));
-                    } catch (Exception e) {
-                        messager.printMessage(Diagnostic.Kind.ERROR, Throwables.getStackTraceAsString(e));
-                    }
-                    return Stream.empty();
-                }).toArray(JCTree[]::new);
-        return List.from(jcTrees);
+    protected Stream<JCTree> handleDecl(JCVariableDecl jcVariableDecl) {
+        try {
+            return Stream.of(this.generateGetterMethod(jcVariableDecl), this.generateSetterMethod(jcVariableDecl));
+        } catch (ReflectiveOperationException e) {
+            messager.printMessage(Diagnostic.Kind.ERROR, Throwables.getStackTraceAsString(e));
+        }
+        return Stream.empty();
     }
 
-    private JCMethodDecl generateGetterMethod(JCTree.JCVariableDecl jcVariable) {
-        JCTree.JCModifiers jcModifiers = treeMaker.Modifiers(Flags.PUBLIC);
+    private JCMethodDecl generateGetterMethod(JCVariableDecl jcVariable) {
+        JCModifiers jcModifiers = treeMaker.Modifiers(Flags.PUBLIC);
         Name methodName = handleMethodSignature(jcVariable.getName(), "get");
         ListBuffer<JCStatement> jcStatements = new ListBuffer<>();
         jcStatements.append(
