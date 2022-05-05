@@ -1,6 +1,4 @@
-package com.goody.utils.qianliang.annotation;
-
-import com.goody.utils.qianliang.processor.GetterAndSetterProcessor;
+package com.goody.utils.qianliang.example;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -18,5 +16,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
+@Deprecated
 public @interface GetterAndSetter {
 }

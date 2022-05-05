@@ -1,6 +1,6 @@
 package com.goody.utils.baihao.pojo;
 
-import com.goody.utils.qianliang.annotation.GetterAndSetter;
+import com.goody.utils.qianliang.example.GetterAndSetter;
 
 /**
  * {@link GetterAndSetter} test

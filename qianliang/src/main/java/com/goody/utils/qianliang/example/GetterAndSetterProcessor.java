@@ -1,6 +1,5 @@
-package com.goody.utils.qianliang.processor;
+package com.goody.utils.qianliang.example;
 
-import com.goody.utils.qianliang.annotation.GetterAndSetter;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
@@ -49,9 +48,10 @@ import java.util.stream.Collectors;
  * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
-@SupportedAnnotationTypes({"com.goody.utils.qianliang.annotation.GetterAndSetter"})
+@SupportedAnnotationTypes({"com.goody.utils.qianliang.example.GetterAndSetter"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
+@Deprecated
 public class GetterAndSetterProcessor extends AbstractProcessor {
 
     /** javac trees */
