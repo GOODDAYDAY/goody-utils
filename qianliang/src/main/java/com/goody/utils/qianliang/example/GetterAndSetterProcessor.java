@@ -1,13 +1,12 @@
 package com.goody.utils.qianliang.example;
 
+import com.goody.utils.qianliang.processor.BaseProcessor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Throwables;
 import com.sun.source.tree.Tree;
-import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
-import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
@@ -16,30 +15,20 @@ import com.sun.tools.javac.tree.JCTree.JCModifiers;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
 import com.sun.tools.javac.tree.JCTree.JCTypeParameter;
 import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
-import com.sun.tools.javac.tree.TreeMaker;
-import com.sun.tools.javac.tree.TreeTranslator;
-import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Name;
-import com.sun.tools.javac.util.Names;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.Nonnull;
 import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * {@link GetterAndSetter} processor
@@ -52,71 +41,33 @@ import java.util.stream.Collectors;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 @Deprecated
-public class GetterAndSetterProcessor extends AbstractProcessor {
-
-    /** javac trees */
-    private JavacTrees trees;
-    /** AST */
-    private TreeMaker treeMaker;
-    /** mark name */
-    private Names names;
-    /** log */
-    private Messager messager;
-    /** filer */
-    private Filer filer;
+public class GetterAndSetterProcessor extends BaseProcessor<GetterAndSetter> {
 
     /**
-     * {@inheritDoc}
+     * subclass should implement this method to add method or variable or others
+     *
+     * @param jcClassDecl jcClassDecl
+     * @return new JCTree list
      */
+    @Nonnull
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        this.trees = JavacTrees.instance(processingEnv);
-        this.messager = processingEnv.getMessager();
-        this.filer = processingEnv.getFiler();
-        final Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
-        this.treeMaker = TreeMaker.instance(context);
-        this.names = Names.instance(context);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        Set<? extends Element> annotation = roundEnv.getElementsAnnotatedWith(GetterAndSetter.class);
-        annotation.stream().map(element -> trees.getTree(element))
-                // tree is the class input. Modify the JCTree to modify the method or argus
-                .forEach(tree -> tree.accept(new TreeTranslator() {
-                    @Override
-                    public void visitClassDef(JCTree.JCClassDecl jcClass) {
-                        // NOTE(goody): 2022/5/4 https://stackoverflow.com/questions/46874126/java-lang-assertionerror-thrown-by-compiler-when-adding-generated-method-with-pa
-                        // setMethod var is a new Object from jcVariable, the pos should be reset to jcClass
-                        treeMaker.at(jcClass.pos);
-
-                        Map<Name, JCTree.JCVariableDecl> treeMap =
-                                jcClass.defs.stream().filter(k -> k.getKind().equals(Tree.Kind.VARIABLE))
-                                        .map(tree -> (JCTree.JCVariableDecl) tree)
-                                        .collect(Collectors.toMap(JCTree.JCVariableDecl::getName, Function.identity()));
-                        treeMap.forEach((k, jcVariable) -> {
-                            try {
-                                // add getter,setter methods
-                                final JCMethodDecl getMethod = generateGetterMethod(jcVariable);
-                                final JCMethodDecl setMethod = generateSetterMethod(jcVariable);
-                                jcClass.defs = jcClass.defs.prependList(List.of(getMethod, setMethod));
-                            } catch (Exception e) {
-                                messager.printMessage(Diagnostic.Kind.ERROR, Throwables.getStackTraceAsString(e));
-                            }
-                        });
-                        super.visitClassDef(jcClass);
+    public List<JCTree> generate(JCTree.JCClassDecl jcClassDecl) {
+        Map<Name, JCTree.JCVariableDecl> treeMap =
+                jcClassDecl.defs.stream().filter(k -> k.getKind().equals(Tree.Kind.VARIABLE))
+                        .map(tree -> (JCTree.JCVariableDecl) tree)
+                        .collect(Collectors.toMap(JCTree.JCVariableDecl::getName, Function.identity()));
+        final JCTree[] jcTrees = treeMap.values()
+                .stream()
+                .flatMap(jcVariable -> {
+                    try {
+                        // add getter,setter methods
+                        return Stream.of(generateGetterMethod(jcVariable), generateSetterMethod(jcVariable));
+                    } catch (Exception e) {
+                        messager.printMessage(Diagnostic.Kind.ERROR, Throwables.getStackTraceAsString(e));
                     }
-
-                    @Override
-                    public void visitMethodDef(JCMethodDecl jcMethod) {
-                        super.visitMethodDef(jcMethod);
-                    }
-                }));
-        return true;
+                    return Stream.empty();
+                }).toArray(JCTree[]::new);
+        return List.from(jcTrees);
     }
 
     private JCMethodDecl generateGetterMethod(JCTree.JCVariableDecl jcVariable) {

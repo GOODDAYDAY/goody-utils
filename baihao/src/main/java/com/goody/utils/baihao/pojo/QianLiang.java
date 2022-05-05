@@ -1,5 +1,6 @@
 package com.goody.utils.baihao.pojo;
 
+import com.goody.utils.qianliang.example.AddVariable;
 import com.goody.utils.qianliang.example.GetterAndSetter;
 
 /**
@@ -10,6 +11,7 @@ import com.goody.utils.qianliang.example.GetterAndSetter;
  * @since 1.0.0
  */
 @GetterAndSetter
+@AddVariable
 public class QianLiang {
     private String name;
 
