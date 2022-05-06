@@ -1,9 +1,8 @@
-package com.goody.utils.baihao.pojo;
-
-import com.goody.utils.qianliang.example.AddMethod;
-import com.goody.utils.qianliang.example.AddVariable;
+package com.goody.utils.qianliang.example;
 
 /**
+ * TODO(goody): 2022/5/6 find the way to run processor in test compile.
+ *
  * @author Goody
  * @version 1.0, 2022/5/4
  * @since 1.0.0

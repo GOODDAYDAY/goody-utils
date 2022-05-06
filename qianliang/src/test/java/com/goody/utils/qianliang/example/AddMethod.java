@@ -7,18 +7,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@link AddVariableProcessor} annotation
+ * {@link AddMethodProcessor} annotation
  *
  * @author Goody
- * @version 1.0, 2022/5/5
+ * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
-@Deprecated
-public @interface AddVariable {
-    String name();
-
-    Class<? extends Object> clazz();
+public @interface AddMethod {
 }

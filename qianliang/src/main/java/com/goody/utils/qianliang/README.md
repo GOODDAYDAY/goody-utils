@@ -2,10 +2,9 @@
 
 ### Annotation & Reflect Utils
 
-### File in `example`
+### File in `src/test/java/com/goody/utils/qianliang/example`
 
-**GetterAndSetter**
-
+**AddMethod**
 * Add getter and setter methods.
   **AddVariable**
 * Add a variable to Object.
@@ -14,4 +13,5 @@
 
 **BaseProcessor**
 
-* 
+* Main file for processor.
+* Integrated some methods for class,method,variable,annotation.

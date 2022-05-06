@@ -20,7 +20,6 @@ import javax.lang.model.SourceVersion;
 @SupportedAnnotationTypes({"com.goody.utils.qianliang.example.AddVariable"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-@Deprecated
 public class AddVariableProcessor extends BaseProcessor<AddVariable> {
 
     @Override

@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 @SupportedAnnotationTypes({"com.goody.utils.qianliang.example.AddMethod"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-@Deprecated
 public class AddMethodProcessor extends BaseProcessor<AddMethod> {
 
     @Override
