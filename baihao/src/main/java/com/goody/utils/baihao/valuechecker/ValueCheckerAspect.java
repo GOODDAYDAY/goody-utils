@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,11 +58,25 @@ public class ValueCheckerAspect {
         return point.proceed();
     }
 
-    private void valueCheck(ValueCheckers.ValueChecker checker, ProceedingJoinPoint point) throws ValueIllegalException, InvocationTargetException, IllegalAccessException {
-        // get the handler with class name
-        Object instance = getBean(checker.handler());
-        Object[] params = SeplUtil.getValue(point, checker.keys());
-        methodInvoke(instance, checker.method(), params);
+    private void valueCheck(ValueCheckers.ValueChecker checker, ProceedingJoinPoint point) throws InvocationTargetException, IllegalAccessException {
+        try {
+            // get the handler with class name
+            Object instance = getBean(checker.handler());
+            Object[] params = SeplUtil.getValue(point, checker.keys());
+            methodInvoke(instance, checker.method(), params);
+        } catch (UndeclaredThrowableException | InvocationTargetException | IllegalAccessException e) {
+            // catch the exception which has ValueIllegalException as cause.
+            // otherwise throw exception as exception display in upside.
+            if (e.getCause() instanceof ValueIllegalException) {
+                throw new ValueIllegalException(e.getCause().getMessage());
+            }
+            LOGGER.error("method invoke exception", e);
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("method invoke exception", e);
+            throw e;
+        }
+
     }
 
     /**
