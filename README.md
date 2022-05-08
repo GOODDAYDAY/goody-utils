@@ -2,10 +2,10 @@
 
 ### Util modules of Goody
 * baihao
-  * Testing of Ioc & Aop. 
-  * Other tests.
+  * utils with spring
 * qianliang
   * Be like lombok to generate code in compile stage.
+  * Other utils
 * xueya
-  * To Be Continue...
+  * a tiny framework with some basic feature
 
