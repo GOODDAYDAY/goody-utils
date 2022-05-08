@@ -68,7 +68,7 @@ public class ValueCheckerAspect {
             // catch the exception which has ValueIllegalException as cause.
             // otherwise throw exception as exception display in upside.
             if (e.getCause() instanceof ValueIllegalException) {
-                throw new ValueIllegalException(e.getCause().getMessage());
+                throw (ValueIllegalException) e.getCause();
             }
             LOGGER.error("method invoke exception", e);
             throw e;

@@ -12,4 +12,11 @@ public class ValueIllegalException extends RuntimeException {
     public ValueIllegalException(String message) {
         super(message, null, true, false);
     }
+
+    public ValueIllegalException(String message,
+                                 Throwable cause,
+                                 boolean enableSuppression,
+                                 boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }
