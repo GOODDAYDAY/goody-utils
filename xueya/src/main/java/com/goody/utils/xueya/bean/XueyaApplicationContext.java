@@ -1,7 +1,5 @@
 package com.goody.utils.xueya.bean;
 
-import com.sun.istack.internal.Nullable;
-
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -123,7 +121,6 @@ public class XueyaApplicationContext {
      * @param clazz class
      * @return beanDefinition
      */
-    @Nullable
     private BeanDefinition convertClassToBeanDefinition(Class<?> clazz) {
         // only init the class which has annotation component
         if (!clazz.isAnnotationPresent(Component.class)) {
@@ -182,7 +179,7 @@ public class XueyaApplicationContext {
      *
      * @param object object
      */
-    private void wireField(@Nullable Object object) {
+    private void wireField(Object object) {
         if (null == object) {
             throw new NullPointerException("wire filed of null object");
         }
@@ -213,7 +210,6 @@ public class XueyaApplicationContext {
      * @param clazz class
      * @return object
      */
-    @Nullable
     private Object instanceOf(Class<?> clazz) {
         try {
             return clazz.getDeclaredConstructor().newInstance();
