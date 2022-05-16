@@ -1,9 +1,9 @@
-package com.goody.utils.qianliang.example.bean;
+package com.goody.utils.xueya.example.bean;
 
-import com.goody.utils.qianliang.example.bean.subpath.SubpathManager1;
-import com.goody.utils.qianliang.example.bean.subpath.SubpathManager2;
 import com.goody.utils.xueya.bean.Autowired;
 import com.goody.utils.xueya.bean.Component;
+import com.goody.utils.xueya.example.bean.subpath.SubpathManager1;
+import com.goody.utils.xueya.example.bean.subpath.SubpathManager2;
 
 /**
  * the manager in example

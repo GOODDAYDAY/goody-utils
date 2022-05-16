@@ -1,12 +1,17 @@
 package com.goody.utils.xueya.bean;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Stream;
 
 /**
@@ -68,18 +73,23 @@ public class XueyaApplicationContext {
     /**
      * find all files in paths input.Find java class with annotation {@link Component} and generate {@link BeanDefinition}
      *
-     * @param packagePaths paths
+     * @param references paths
      */
-    private void generateBeanDefinition(String[] packagePaths) {
-        Arrays.stream(packagePaths)
-                .flatMap(packagePath -> {
-                    final String path = this.convertPackageToPath(packagePath);
+    private void generateBeanDefinition(String[] references) {
+        Arrays.stream(references)
+                .flatMap(reference -> {
+                    final String path = this.convertReferenceToPath(reference);
                     final URL resource = this.configClass.getClassLoader().getResource(path);
                     if (null == resource) {
                         return Stream.empty();
                     }
-                    final File file = new File(resource.getFile());
-                    return this.generateBeanDefinition(file, packagePath);
+                    if (resource.getProtocol().equals("file")) {
+                        final File file = new File(resource.getFile());
+                        return this.generateBeanDefinition(file, reference);
+                    } else if (resource.getProtocol().equals("jar")) {
+                        return this.generateBeanDefinition(resource, path);
+                    }
+                    return Stream.empty();
                 })
                 .filter(Objects::nonNull)
                 .forEach(beanDefinition -> this.nameBeanDefinition.put(beanDefinition.getName(), beanDefinition));
@@ -90,38 +100,70 @@ public class XueyaApplicationContext {
      *
      * <p> traverse all path with recursion
      *
-     * @param file            classFile
-     * @param filePackagePath file's package path
+     * @param file          classFile
+     * @param fileReference file's package path
      * @return Stream
      */
-    private Stream<BeanDefinition> generateBeanDefinition(File file, String filePackagePath) {
-        // handle directory file, recurse the directory file and filePackagePath
+    private Stream<BeanDefinition> generateBeanDefinition(File file, String fileReference) {
+        // handle directory file, recurse the directory file and fileReference
         if (file.isDirectory()) {
-            return Arrays.stream(file.listFiles()).flatMap(subFile -> this.generateBeanDefinition(subFile, this.generatePackagePath(filePackagePath, subFile.getName())));
+            return Arrays.stream(file.listFiles()).flatMap(subFile -> this.generateBeanDefinition(subFile, this.generateReference(fileReference, subFile.getName())));
         }
         // only .class file should be instantiated
         if (!file.getName().endsWith(".class")) {
             return Stream.empty();
         }
         // instantiate the class
+        return Stream.of(this.convertClassToBeanDefinition(fileReference));
+    }
+
+    /**
+     * generate the {@link BeanDefinition} with URL input and target path.
+     *
+     * @param jarUrl jarUrl to get {@link JarFile}
+     * @param path   target path
+     * @return Stream
+     */
+    private Stream<BeanDefinition> generateBeanDefinition(URL jarUrl, String path) {
+        final Stream.Builder<BeanDefinition> streamBuilder = Stream.builder();
         try {
-            final Class<?> clazz = this.configClass.getClassLoader().loadClass(filePackagePath);
-            final BeanDefinition beanDefinition = this.convertClassToBeanDefinition(clazz);
-            return Stream.of(beanDefinition);
-        } catch (ClassNotFoundException e) {
+            final JarURLConnection jarURLConnection = (JarURLConnection) jarUrl.openConnection();
+            // jar file is root path in jar, it will scan all path
+            final JarFile jarFile = jarURLConnection.getJarFile();
+            // jarEntries has all file in jar
+            final Enumeration<JarEntry> jarEntries = jarFile.entries();
+            while (jarEntries.hasMoreElements()) {
+                final JarEntry file = jarEntries.nextElement();
+                final String name = file.getName();
+                // path for making sure jarEntry is target item
+                if (name.startsWith(path)) {
+                    if (!file.isDirectory()) {
+                        final String reference = this.convertPathToReference(name);
+                        streamBuilder.add(this.convertClassToBeanDefinition(reference));
+                    }
+                }
+            }
+        } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
+            return Stream.empty();
         }
-        return Stream.empty();
+        return streamBuilder.build();
     }
 
     /**
      * convert class with annotation {@link Component} to {@link BeanDefinition}.
      *
-     * @param clazz class
+     * @param classReference classReference
      * @return beanDefinition
      */
-    private BeanDefinition convertClassToBeanDefinition(Class<?> clazz) {
+    private BeanDefinition convertClassToBeanDefinition(String classReference) {
+        final Class<?> clazz;
+        try {
+            clazz = this.configClass.getClassLoader().loadClass(classReference);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
         // only init the class which has annotation component
         if (!clazz.isAnnotationPresent(Component.class)) {
             return null;
@@ -220,23 +262,33 @@ public class XueyaApplicationContext {
     }
 
     /**
-     * the path input is packagePath. {@link ClassLoader} reads sources with path like com/goody
+     * the path input is reference. {@link ClassLoader} reads sources with path like com/goody
      *
-     * @param packagePath path like com.goody
+     * @param reference path like com.goody
      * @return com/goody
      */
-    private String convertPackageToPath(String packagePath) {
-        return packagePath.replace(".", "/");
+    private String convertReferenceToPath(String reference) {
+        return reference.replace(".", "/");
+    }
+
+    /**
+     * convert file path to reference
+     *
+     * @param path e.g.: com/goody/utils/xueya/Manager.class
+     * @return e.g.: com.goody.utils.xueya.Manager
+     */
+    private String convertPathToReference(String path) {
+        return path.replace("/", ".").replace(".class", "");
     }
 
     /**
      * assemble the package path with file
      *
-     * @param packagePath packagePath like com.goody
-     * @param fileName    file with suffix like XueYa.class
-     * @return packagePath like com.goody.class
+     * @param reference reference like com.goody
+     * @param fileName  file with suffix like XueYa.class
+     * @return reference like com.goody.class
      */
-    private String generatePackagePath(String packagePath, String fileName) {
-        return String.format("%s.%s", packagePath, fileName.split("\\.")[0]);
+    private String generateReference(String reference, String fileName) {
+        return String.format("%s.%s", reference, fileName.split("\\.")[0]);
     }
 }
