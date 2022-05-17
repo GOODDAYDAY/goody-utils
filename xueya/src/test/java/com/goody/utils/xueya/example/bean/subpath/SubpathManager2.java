@@ -2,6 +2,7 @@ package com.goody.utils.xueya.example.bean.subpath;
 
 import com.goody.utils.xueya.bean.Autowired;
 import com.goody.utils.xueya.bean.Component;
+import com.goody.utils.xueya.example.aop.Aop1;
 import com.goody.utils.xueya.example.bean.Manager;
 
 /**
@@ -11,6 +12,7 @@ import com.goody.utils.xueya.example.bean.Manager;
  * @version 1.0, 2022/5/10
  * @since 1.0.0
  */
+@Aop1
 @Component("subpathManager2")
 public class SubpathManager2 {
 
@@ -22,6 +24,7 @@ public class SubpathManager2 {
     private Manager manager;
 
     public SubpathManager2() {
+        // cglib proxy will generate twice
         System.out.println("SubpathManager2 init");
     }
 

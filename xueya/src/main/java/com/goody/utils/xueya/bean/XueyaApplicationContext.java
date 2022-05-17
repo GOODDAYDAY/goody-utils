@@ -1,5 +1,7 @@
 package com.goody.utils.xueya.bean;
 
+import com.goody.utils.xueya.context.Context;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -8,6 +10,9 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
@@ -23,18 +28,13 @@ import java.util.stream.Stream;
  */
 public class XueyaApplicationContext {
     private final Class<?> configClass;
-    private final ConcurrentHashMap<String, BeanDefinition> nameBeanDefinition;
-    private final ConcurrentHashMap<String, Object> nameSingletonPool;
+    private static final List<Context> contexts = new LinkedList<>();
+    private static final ConcurrentHashMap<String, BeanDefinition> nameBeanDefinition = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Object> nameSingletonPool = new ConcurrentHashMap<>();
 
     public XueyaApplicationContext(Class<?> configClass) {
+        // TODO(goody): 2022/5/17 solve nameSingletonPool is not proxy element.
         this.configClass = configClass;
-        final String[] paths = this.componentScanPath(configClass);
-
-        this.nameBeanDefinition = new ConcurrentHashMap<>();
-        this.generateBeanDefinition(paths);
-
-        this.nameSingletonPool = new ConcurrentHashMap<>();
-        this.initializeSingletonPool();
     }
 
     /**
@@ -43,19 +43,70 @@ public class XueyaApplicationContext {
      * @param name beanName
      * @return bean
      */
-    public <T> T getBean(String name) {
-        if (this.nameBeanDefinition.containsKey(name)) {
-            final BeanDefinition beanDefinition = this.nameBeanDefinition.get(name);
+    public static <T> T getBean(String name) {
+        if (nameBeanDefinition.containsKey(name)) {
+            final BeanDefinition beanDefinition = nameBeanDefinition.get(name);
             if (Scope.SINGLETON == beanDefinition.getScope()) {
-                if (!this.nameSingletonPool.containsKey(name)) {
+                if (!nameSingletonPool.containsKey(name)) {
                     throw new NullPointerException("singleton bean not init yet");
                 }
-                return (T) this.nameSingletonPool.get(name);
+                return (T) nameSingletonPool.get(name);
             } else if (Scope.PROTOTYPE == beanDefinition.getScope()) {
-                return (T) this.createBean(beanDefinition.getClazz());
+                return (T) createBean(beanDefinition.getClazz());
             }
         }
         throw new NullPointerException("bean not exist");
+    }
+
+    /**
+     * create instance by class,
+     *
+     * @param clazz class
+     * @return instance
+     */
+    private static Object createBean(Class<?> clazz) {
+        // generate instance
+        Object object = instanceOf(clazz);
+        // wire field
+        wireField(object);
+        // handle object
+        for (Context context : contexts) {
+            object = context.handle(object);
+        }
+        return object;
+    }
+
+    /**
+     * wire bean value to field
+     *
+     * @param object object
+     */
+    private static void wireField(Object object) {
+        if (null == object) {
+            throw new NullPointerException("wire filed of null object");
+        }
+        try {
+            // set bean value to field
+            for (Field field : object.getClass().getDeclaredFields()) {
+                if (field.isAnnotationPresent(Autowired.class)) {
+                    final Autowired autowired = field.getDeclaredAnnotation(Autowired.class);
+                    final Object fieldBean;
+                    // default "" means set value by class
+                    if (null == autowired.value() || "".equals(autowired.value())) {
+                        fieldBean = getBean(field.getName());
+                    } else {
+                        fieldBean = getBean(autowired.value());
+                    }
+                    if (null == fieldBean) {
+                        continue;
+                    }
+                    field.setAccessible(true);
+                    field.set(object, fieldBean);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -71,28 +122,18 @@ public class XueyaApplicationContext {
     }
 
     /**
-     * find all files in paths input.Find java class with annotation {@link Component} and generate {@link BeanDefinition}
+     * generate the instance of class
      *
-     * @param references paths
+     * @param clazz class
+     * @return object
      */
-    private void generateBeanDefinition(String[] references) {
-        Arrays.stream(references)
-                .flatMap(reference -> {
-                    final String path = this.convertReferenceToPath(reference);
-                    final URL resource = this.configClass.getClassLoader().getResource(path);
-                    if (null == resource) {
-                        return Stream.empty();
-                    }
-                    if (resource.getProtocol().equals("file")) {
-                        final File file = new File(resource.getFile());
-                        return this.generateBeanDefinition(file, reference);
-                    } else if (resource.getProtocol().equals("jar")) {
-                        return this.generateBeanDefinition(resource, path);
-                    }
-                    return Stream.empty();
-                })
-                .filter(Objects::nonNull)
-                .forEach(beanDefinition -> this.nameBeanDefinition.put(beanDefinition.getName(), beanDefinition));
+    private static Object instanceOf(Class<?> clazz) {
+        try {
+            return clazz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -151,6 +192,56 @@ public class XueyaApplicationContext {
     }
 
     /**
+     * register context into application.
+     *
+     * @param context context
+     */
+    public void register(Context context) {
+        contexts.add(context);
+    }
+
+    /**
+     * run method.
+     *
+     * <ol>
+     *     <li>scan all file and init bean</li>
+     *     <li>handle bean for new function</li>
+     * </ol>
+     */
+    public void run() {
+        final String[] paths = this.componentScanPath(configClass);
+
+        this.generateBeanDefinition(paths);
+
+        this.initializeSingletonPool();
+    }
+
+    /**
+     * find all files in paths input.Find java class with annotation {@link Component} and generate {@link BeanDefinition}
+     *
+     * @param references paths
+     */
+    private void generateBeanDefinition(String[] references) {
+        Arrays.stream(references)
+                .flatMap(reference -> {
+                    final String path = this.convertReferenceToPath(reference);
+                    final URL resource = this.configClass.getClassLoader().getResource(path);
+                    if (null == resource) {
+                        return Stream.empty();
+                    }
+                    if (resource.getProtocol().equals("file")) {
+                        final File file = new File(resource.getFile());
+                        return this.generateBeanDefinition(file, reference);
+                    } else if (resource.getProtocol().equals("jar")) {
+                        return this.generateBeanDefinition(resource, path);
+                    }
+                    return Stream.empty();
+                })
+                .filter(Objects::nonNull)
+                .forEach(beanDefinition -> nameBeanDefinition.put(beanDefinition.getName(), beanDefinition));
+    }
+
+    /**
      * convert class with annotation {@link Component} to {@link BeanDefinition}.
      *
      * @param classReference classReference
@@ -164,6 +255,22 @@ public class XueyaApplicationContext {
             e.printStackTrace();
             return null;
         }
+        final BeanDefinition beanDefinition = this.doScan(clazz);
+        if (null != beanDefinition) {
+            // do all context scan
+            contexts.forEach(context -> context.doScan(beanDefinition.getName(), clazz));
+        }
+        return beanDefinition;
+    }
+
+    /**
+     * be like {@link Context#doScan(String, Class)}
+     *
+     * @param clazz class
+     * @return beanDefinition
+     */
+    private BeanDefinition doScan(Class<?> clazz) {
+        // main logic for component
         // only init the class which has annotation component
         if (!clazz.isAnnotationPresent(Component.class)) {
             return null;
@@ -174,7 +281,7 @@ public class XueyaApplicationContext {
         }
         // filter the duplicate beanDefinition
         final String beanName = component.value();
-        if (this.nameBeanDefinition.contains(beanName)) {
+        if (nameBeanDefinition.contains(beanName)) {
             return null;
         }
         // init definition
@@ -191,74 +298,23 @@ public class XueyaApplicationContext {
      */
     private void initializeSingletonPool() {
         // init instance value
-        this.nameBeanDefinition.forEach((name, beanDefinition) -> {
+        nameBeanDefinition.forEach((name, beanDefinition) -> {
             if (Scope.SINGLETON == beanDefinition.getScope()) {
-                this.nameSingletonPool.put(name, this.instanceOf(beanDefinition.getClazz()));
+                nameSingletonPool.put(name, instanceOf(beanDefinition.getClazz()));
             }
         });
+
         // wire fields
-        this.nameSingletonPool.forEach((name, singletonBean) -> {
-            this.wireField(singletonBean);
+        nameSingletonPool.forEach((name, singletonBean) -> {
+            wireField(singletonBean);
         });
-    }
 
-    /**
-     * create instance by class,
-     *
-     * @param clazz class
-     * @return instance
-     */
-    private Object createBean(Class<?> clazz) {
-        // generate instance
-        final Object object = this.instanceOf(clazz);
-        // wire field
-        this.wireField(object);
-        return object;
-    }
-
-    /**
-     * wire bean value to field
-     *
-     * @param object object
-     */
-    private void wireField(Object object) {
-        if (null == object) {
-            throw new NullPointerException("wire filed of null object");
-        }
-        try {
-            // set bean value to field
-            for (Field field : object.getClass().getDeclaredFields()) {
-                if (field.isAnnotationPresent(Autowired.class)) {
-                    final Autowired autowired = field.getDeclaredAnnotation(Autowired.class);
-                    final Object fieldBean;
-                    // default "" means set value by class
-                    if (null == autowired.value() || "".equals(autowired.value())) {
-                        fieldBean = this.getBean(field.getName());
-                    } else {
-                        fieldBean = this.getBean(autowired.value());
-                    }
-                    field.setAccessible(true);
-                    field.set(object, fieldBean);
-                }
+        for (Map.Entry<String, Object> entry : nameSingletonPool.entrySet()) {
+            // handle object
+            for (Context context : contexts) {
+                nameSingletonPool.put(entry.getKey(), context.handle(entry.getValue()));
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         }
-    }
-
-    /**
-     * generate the instance of class
-     *
-     * @param clazz class
-     * @return object
-     */
-    private Object instanceOf(Class<?> clazz) {
-        try {
-            return clazz.getDeclaredConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
