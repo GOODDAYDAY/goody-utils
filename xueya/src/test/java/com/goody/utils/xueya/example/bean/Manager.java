@@ -4,6 +4,7 @@ import com.goody.utils.xueya.bean.Autowired;
 import com.goody.utils.xueya.bean.Component;
 import com.goody.utils.xueya.example.bean.subpath.SubpathManager1;
 import com.goody.utils.xueya.example.bean.subpath.SubpathManager2;
+import com.goody.utils.xueya.example.bean.subpath.SubpathManager3;
 
 /**
  * the manager in example
@@ -20,6 +21,8 @@ public class Manager {
     @Autowired
     private SubpathManager2 subpathManager2;
     @Autowired
+    private SubpathManager3 subpathManager3;
+    @Autowired
     private Manager manager;
 
     public Manager() {
@@ -27,6 +30,7 @@ public class Manager {
     }
 
     public void toy() {
+        System.out.println("manager do something ...");
         this.subpathManager2.toy();
     }
 }

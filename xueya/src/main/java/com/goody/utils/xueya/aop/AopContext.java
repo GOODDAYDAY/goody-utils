@@ -1,7 +1,6 @@
 package com.goody.utils.xueya.aop;
 
 import com.goody.utils.xueya.bean.XueyaApplicationContext;
-import com.goody.utils.xueya.context.Context;
 import com.sun.org.slf4j.internal.Logger;
 import com.sun.org.slf4j.internal.LoggerFactory;
 import net.sf.cglib.proxy.Enhancer;
@@ -14,13 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * {@link Context} impl for aop
+ * context for aop
  *
  * @author Goody
  * @version 1.0, 2022/5/16
  * @since 1.0.0
  */
-public class AopContext implements Context {
+public class AopContext {
     private static final Logger log = LoggerFactory.getLogger(AopContext.class);
     private final Map<Class<? extends Annotation>, Node> aopObject;
 
@@ -29,9 +28,11 @@ public class AopContext implements Context {
     }
 
     /**
-     * {@inheritDoc}
+     * scan all `.class`
+     *
+     * @param beanName bean name
+     * @param clazz    bean class
      */
-    @Override
     public void doScan(String beanName, Class<?> clazz) {
         if (!clazz.isAnnotationPresent(Aspect.class)) {
             return;
@@ -50,11 +51,22 @@ public class AopContext implements Context {
     }
 
     /**
-     * {@inheritDoc}
+     * charge if the object is need proxy
+     *
+     * @param object object
+     * @return true -> need ; false -> not
      */
-    @Override
-    public Object handle(Object object) {
-        return this.proxy(object);
+    public boolean isNeedProxy(Object object) {
+        // not contain means is needs not proxy
+        // object.getClass().getAnnotations() will generate class com.sun.proxy.$Proxy3
+        // is makes this.aopObject.containsKey(anno.getClass()) = false.
+        // So search by map
+        for (Map.Entry<Class<? extends Annotation>, Node> entry : this.aopObject.entrySet()) {
+            if (object.getClass().isAnnotationPresent(entry.getKey())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -63,7 +75,7 @@ public class AopContext implements Context {
      * @param object bean object
      * @return object or proxy object
      */
-    private Object proxy(Object object) {
+    public Object proxy(Object object) {
         // not contain means is needs not proxy
         // object.getClass().getAnnotations() will generate class com.sun.proxy.$Proxy3
         // is makes this.aopObject.containsKey(anno.getClass()) = false.

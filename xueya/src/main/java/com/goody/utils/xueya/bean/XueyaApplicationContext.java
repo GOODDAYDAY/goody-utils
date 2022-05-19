@@ -1,6 +1,6 @@
 package com.goody.utils.xueya.bean;
 
-import com.goody.utils.xueya.context.Context;
+import com.goody.utils.xueya.aop.AopContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,9 +10,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarEntry;
@@ -27,14 +24,20 @@ import java.util.stream.Stream;
  * @since 1.0.0
  */
 public class XueyaApplicationContext {
-    private final Class<?> configClass;
-    private static final List<Context> contexts = new LinkedList<>();
+    private static final AopContext aopContext = new AopContext();
     private static final ConcurrentHashMap<String, BeanDefinition> nameBeanDefinition = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, Object> nameSingletonPool = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Object> semiSingletonPool = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Object> singletonPool = new ConcurrentHashMap<>();
+    private final Class<?> configClass;
 
     public XueyaApplicationContext(Class<?> configClass) {
-        // TODO(goody): 2022/5/17 solve nameSingletonPool is not proxy element.
         this.configClass = configClass;
+
+        final String[] paths = this.componentScanPath(configClass);
+
+        this.generateBeanDefinition(paths);
+
+        this.initializeSingletonPool();
     }
 
     /**
@@ -47,10 +50,10 @@ public class XueyaApplicationContext {
         if (nameBeanDefinition.containsKey(name)) {
             final BeanDefinition beanDefinition = nameBeanDefinition.get(name);
             if (Scope.SINGLETON == beanDefinition.getScope()) {
-                if (!nameSingletonPool.containsKey(name)) {
+                if (!singletonPool.containsKey(name)) {
                     throw new NullPointerException("singleton bean not init yet");
                 }
-                return (T) nameSingletonPool.get(name);
+                return (T) singletonPool.get(name);
             } else if (Scope.PROTOTYPE == beanDefinition.getScope()) {
                 return (T) createBean(beanDefinition.getClazz());
             }
@@ -70,8 +73,8 @@ public class XueyaApplicationContext {
         // wire field
         wireField(object);
         // handle object
-        for (Context context : contexts) {
-            object = context.handle(object);
+        if (aopContext.isNeedProxy(object)) {
+            object = aopContext.proxy(object);
         }
         return object;
     }
@@ -192,31 +195,6 @@ public class XueyaApplicationContext {
     }
 
     /**
-     * register context into application.
-     *
-     * @param context context
-     */
-    public void register(Context context) {
-        contexts.add(context);
-    }
-
-    /**
-     * run method.
-     *
-     * <ol>
-     *     <li>scan all file and init bean</li>
-     *     <li>handle bean for new function</li>
-     * </ol>
-     */
-    public void run() {
-        final String[] paths = this.componentScanPath(configClass);
-
-        this.generateBeanDefinition(paths);
-
-        this.initializeSingletonPool();
-    }
-
-    /**
      * find all files in paths input.Find java class with annotation {@link Component} and generate {@link BeanDefinition}
      *
      * @param references paths
@@ -258,13 +236,13 @@ public class XueyaApplicationContext {
         final BeanDefinition beanDefinition = this.doScan(clazz);
         if (null != beanDefinition) {
             // do all context scan
-            contexts.forEach(context -> context.doScan(beanDefinition.getName(), clazz));
+            aopContext.doScan(beanDefinition.getName(), clazz);
         }
         return beanDefinition;
     }
 
     /**
-     * be like {@link Context#doScan(String, Class)}
+     * scan all `.class` file
      *
      * @param clazz class
      * @return beanDefinition
@@ -300,21 +278,21 @@ public class XueyaApplicationContext {
         // init instance value
         nameBeanDefinition.forEach((name, beanDefinition) -> {
             if (Scope.SINGLETON == beanDefinition.getScope()) {
-                nameSingletonPool.put(name, instanceOf(beanDefinition.getClazz()));
+                semiSingletonPool.put(name, instanceOf(beanDefinition.getClazz()));
             }
         });
 
-        // wire fields
-        nameSingletonPool.forEach((name, singletonBean) -> {
-            wireField(singletonBean);
+        // proxy bean
+        semiSingletonPool.forEach((name, semiBean) -> {
+            if (aopContext.isNeedProxy(semiBean)) {
+                singletonPool.put(name, aopContext.proxy(semiBean));
+            } else {
+                singletonPool.put(name, semiBean);
+            }
         });
 
-        for (Map.Entry<String, Object> entry : nameSingletonPool.entrySet()) {
-            // handle object
-            for (Context context : contexts) {
-                nameSingletonPool.put(entry.getKey(), context.handle(entry.getValue()));
-            }
-        }
+        // wired semi bean and then singleton bean is finished
+        semiSingletonPool.forEach((name, semiBean) -> wireField(semiBean));
     }
 
     /**
