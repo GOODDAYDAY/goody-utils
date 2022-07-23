@@ -1,4 +1,4 @@
-package com.goody.utils.qianliang.example;
+package com.goody.utils.qianliang.processor.impl;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * {@link AddVariableProcessor} annotation
+ * {@link OffsetLimitProcessor} annotation
  *
  * @author Goody
  * @version 1.0, 2022/5/5
@@ -16,8 +16,5 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
-public @interface AddVariable {
-    String name();
-
-    Class<? extends Object> clazz();
+public @interface OffsetLimit {
 }

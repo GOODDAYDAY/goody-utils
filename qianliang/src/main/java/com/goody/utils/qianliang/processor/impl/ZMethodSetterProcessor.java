@@ -1,9 +1,8 @@
-package com.goody.utils.qianliang.example;
+package com.goody.utils.qianliang.processor.impl;
 
 import com.goody.utils.qianliang.processor.BaseProcessor;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
-import com.google.common.base.Throwables;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree;
@@ -22,44 +21,27 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
-import javax.tools.Diagnostic;
 import java.util.stream.Stream;
 
 /**
- * {@link AddMethod} processor
+ * {@link Setter} processor
  *
  * @author Goody
  * @version 1.0, 2022/5/4
  * @since 1.0.0
  */
-@SupportedAnnotationTypes({"com.goody.utils.qianliang.example.AddMethod"})
+@SupportedAnnotationTypes({"com.goody.utils.qianliang.processor.impl.Setter"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
-public class AddMethodProcessor extends BaseProcessor<AddMethod> {
+public class ZMethodSetterProcessor extends BaseProcessor<Setter> {
 
     @Override
     protected Stream<JCTree> handleDecl(JCVariableDecl jcVariableDecl) {
         try {
-            return Stream.of(this.generateGetterMethod(jcVariableDecl), this.generateSetterMethod(jcVariableDecl));
+            return Stream.of(this.generateSetterMethod(jcVariableDecl));
         } catch (ReflectiveOperationException e) {
-            messager.printMessage(Diagnostic.Kind.ERROR, Throwables.getStackTraceAsString(e));
+            return Stream.empty();
         }
-        return Stream.empty();
-    }
-
-    private JCMethodDecl generateGetterMethod(JCVariableDecl jcVariable) {
-        JCModifiers jcModifiers = treeMaker.Modifiers(Flags.PUBLIC);
-        Name methodName = handleMethodSignature(jcVariable.getName(), "get");
-        ListBuffer<JCStatement> jcStatements = new ListBuffer<>();
-        jcStatements.append(
-                treeMaker.Return(treeMaker.Select(treeMaker.Ident(getNameFromString("this")), jcVariable.getName())));
-        JCBlock jcBlock = treeMaker.Block(0, jcStatements.toList());
-        JCExpression returnType = jcVariable.vartype;
-        List<JCTypeParameter> typeParameters = List.nil();
-        List<JCVariableDecl> parameters = List.nil();
-        List<JCExpression> throwsClauses = List.nil();
-        return treeMaker
-                .MethodDef(jcModifiers, methodName, returnType, typeParameters, parameters, throwsClauses, jcBlock, null);
     }
 
     private JCMethodDecl generateSetterMethod(JCVariableDecl jcVariable) throws ReflectiveOperationException {
@@ -68,18 +50,18 @@ public class AddMethodProcessor extends BaseProcessor<AddMethod> {
         Name methodName = handleMethodSignature(variableName, "set");
         ListBuffer<JCStatement> jcStatements = new ListBuffer<>();
         jcStatements.append(treeMaker.Exec(treeMaker
-                .Assign(treeMaker.Select(treeMaker.Ident(getNameFromString("this")), variableName),
-                        treeMaker.Ident(variableName))));
+            .Assign(treeMaker.Select(treeMaker.Ident(getNameFromString("this")), variableName),
+                treeMaker.Ident(variableName))));
         JCBlock jcBlock = treeMaker.Block(0, jcStatements.toList());
         JCExpression returnType =
-                treeMaker.Type((Type) (Class.forName("com.sun.tools.javac.code.Type$JCVoidType").newInstance()));
+            treeMaker.Type((Type) (Class.forName("com.sun.tools.javac.code.Type$JCVoidType").newInstance()));
         List<JCTypeParameter> typeParameters = List.nil();
         JCVariableDecl variableDecl = treeMaker
-                .VarDef(treeMaker.Modifiers(Flags.PARAMETER), jcVariable.name, jcVariable.vartype, null);
+            .VarDef(treeMaker.Modifiers(Flags.PARAMETER), jcVariable.name, jcVariable.vartype, null);
         List<JCVariableDecl> parameters = List.of(variableDecl);
         List<JCExpression> throwsClauses = List.nil();
         return treeMaker
-                .MethodDef(modifiers, methodName, returnType, typeParameters, parameters, throwsClauses, jcBlock, null);
+            .MethodDef(modifiers, methodName, returnType, typeParameters, parameters, throwsClauses, jcBlock, null);
     }
 
     private Name handleMethodSignature(Name name, String prefix) {
