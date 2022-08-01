@@ -10,6 +10,7 @@
     <version>1.0.0</version>
     <modules>
         <module>xueya</module>
+        <module>maojian</module>
         <module>qianliang</module>
         <module>baihao</module>
     </modules>
