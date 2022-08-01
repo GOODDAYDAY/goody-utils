@@ -11,3 +11,7 @@ message People {
   int32 age = 2;
 }
 
+service PeopleService {
+  rpc hello(People) returns (People);
+}
+

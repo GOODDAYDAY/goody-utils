@@ -16,6 +16,8 @@
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <proto.version>3.21.4</proto.version>
+        <io.grpc.version>1.48.0</io.grpc.version>
     </properties>
 
     <dependencies>
@@ -23,50 +25,68 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.21.4</version>
+            <version>${proto.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util -->
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
-            <version>3.21.4</version>
+            <version>${proto.version}</version>
             <scope>runtime</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.protobuf/protoc -->
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protoc</artifactId>
-            <version>3.21.4</version>
+            <version>${proto.version}</version>
             <type>pom</type>
         </dependency>
         <!-- https://mvnrepository.com/artifact/io.grpc/grpc-all -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-all</artifactId>
-            <version>1.48.0</version>
+            <version>${io.grpc.version}</version>
         </dependency>
     </dependencies>
 
     <build>
+        <!--    add dependency for ${os.detected.classifier}    -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.7.0</version>
+            </extension>
+        </extensions>
+
         <plugins>
             <plugin>
+                <!--        https://www.xolstice.org/protobuf-maven-plugin/        -->
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
-                    <!--          path for protoc.exe          -->
-                    <protocExecutable>src/main/resources/protoc/protoc.exe</protocExecutable>
+                    <!--          clean all directory, if true compile-custom will delete all files in compile           -->
+                    <clearOutputDirectory>false</clearOutputDirectory>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:${proto.version}:exe:${os.detected.classifier}
+                    </protocArtifact>
                     <!--          path for .proto files          -->
                     <protoSourceRoot>src/main/resources/protobuf</protoSourceRoot>
                     <!--          enough for path java.   `.proto` file will set package          -->
                     <outputDirectory>src/main/java/</outputDirectory>
-                    <!--          clean all directory          -->
-                    <clearOutputDirectory>true</clearOutputDirectory>
+                    <!--        plugin for grpc-srvice            -->
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>
+                        io.grpc:protoc-gen-grpc-java:${io.grpc.version}:exe:${os.detected.classifier}
+                    </pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
+                        <!--      run when mvn compile       -->
                         <goals>
                             <goal>compile</goal>
+                            <goal>compile-custom</goal>
                         </goals>
                     </execution>
                 </executions>
