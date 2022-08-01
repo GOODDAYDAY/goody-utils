@@ -32,6 +32,19 @@
             <version>3.21.4</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.protobuf/protoc -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protoc</artifactId>
+            <version>3.21.4</version>
+            <type>pom</type>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.grpc/grpc-all -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-all</artifactId>
+            <version>1.48.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -41,11 +54,13 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
                 <configuration>
+                    <!--          path for protoc.exe          -->
                     <protocExecutable>src/main/resources/protoc/protoc.exe</protocExecutable>
+                    <!--          path for .proto files          -->
                     <protoSourceRoot>src/main/resources/protobuf</protoSourceRoot>
-                    <!--          到java即可，proto文件内，设置package          -->
+                    <!--          enough for path java.   `.proto` file will set package          -->
                     <outputDirectory>src/main/java/</outputDirectory>
-                    <!--          生成前清空目录          -->
+                    <!--          clean all directory          -->
                     <clearOutputDirectory>true</clearOutputDirectory>
                 </configuration>
                 <executions>
