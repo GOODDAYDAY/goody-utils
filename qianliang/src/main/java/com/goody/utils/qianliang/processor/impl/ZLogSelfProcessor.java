@@ -21,7 +21,7 @@ import javax.lang.model.SourceVersion;
 import java.util.stream.Stream;
 
 /**
- * {@link Getter} processor
+ * {@link LogSelf} processor
  *
  * @author Goody
  * @version 1.0, 2022/5/4
@@ -41,6 +41,14 @@ public class ZLogSelfProcessor extends BaseProcessor<LogSelf> {
         }
     }
 
+    /**
+     * <pre>
+     *  <@javax.annotation.PostConstruct()
+     *  public void logSelf() {
+     *      log.warn("---------- {}", this);
+     *  }
+     * </pre>
+     */
     private JCTree logSelf() throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         JCTree.JCAnnotation jcAnnotation = treeMaker.Annotation(chainDots("javax.annotation.PostConstruct"), List.nil());
         JCModifiers jcModifiers = treeMaker.Modifiers(Flags.PUBLIC, List.of(jcAnnotation));

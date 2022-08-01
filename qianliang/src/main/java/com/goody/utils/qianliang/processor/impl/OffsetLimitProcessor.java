@@ -31,15 +31,25 @@ public class OffsetLimitProcessor extends BaseProcessor<OffsetLimit> {
         return Stream.of(limit(), offset());
     }
 
+    /**
+     * <pre>
+     *     private int limit;
+     * </pre>
+     */
     private JCTree limit() {
         JCTree.JCModifiers modifiers = treeMaker.Modifiers(Flags.PRIVATE);
         Name limitName = names.fromString("limit");
         return treeMaker.VarDef(modifiers, limitName, treeMaker.TypeIdent(TypeTag.INT), null);
     }
 
+    /**
+     * <pre>
+     *     private int offset;
+     * </pre>
+     */
     private JCTree offset() {
         JCTree.JCModifiers modifiers = treeMaker.Modifiers(Flags.PRIVATE);
-        Name limitName = names.fromString("offset");
-        return treeMaker.VarDef(modifiers, limitName, treeMaker.TypeIdent(TypeTag.INT), null);
+        Name offsetName = names.fromString("offset");
+        return treeMaker.VarDef(modifiers, offsetName, treeMaker.TypeIdent(TypeTag.INT), null);
     }
 }
