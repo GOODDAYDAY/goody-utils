@@ -5,10 +5,18 @@ import akka.actor.typed.javadsl.AbstractBehavior;
 import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
+import akka.actor.typed.javadsl.ReceiveBuilder;
 import com.goody.utils.longjing.akka.command.TaskCommand;
+import com.goody.utils.longjing.akka.command.TaskStartCommand;
 import com.goody.utils.longjing.akka.command.TaskStopCommand;
+import com.goody.utils.longjing.akka.command.TaskWorkCommand;
+import com.goody.utils.longjing.akka.service.ITaskActorService;
+import com.goody.utils.longjing.akka.state.TaskCloseState;
+import com.goody.utils.longjing.akka.state.TaskInitState;
+import com.goody.utils.longjing.akka.state.TaskState;
+import com.goody.utils.longjing.akka.state.TaskWorkingState;
 
-import static com.goody.utils.longjing.akka.util.AkkaUtil.same;
+import java.util.function.Supplier;
 
 /**
  * task b actor
@@ -18,20 +26,62 @@ import static com.goody.utils.longjing.akka.util.AkkaUtil.same;
  * @since 1.0.0
  */
 public class TaskBActor extends AbstractBehavior<TaskCommand> {
+    private final ITaskActorService service;
+    /** state of one actor */
+    public TaskState state;
 
-    public TaskBActor(ActorContext<TaskCommand> actorContext) {
+    public TaskBActor(ActorContext<TaskCommand> actorContext, ITaskActorService service, String value) {
         super(actorContext);
-        System.out.println("create TaskBActor");
-    }
-
-    public static Behavior<TaskCommand> create() {
-        return Behaviors.setup(TaskBActor::new);
+        this.state = new TaskCloseState(value);
+        this.service = service;
+        System.out.println("create TaskBActor " + this.state);
     }
 
     @Override
     public Receive<TaskCommand> createReceive() {
-        return this.newReceiveBuilder()
-            .onMessage(TaskStopCommand.class, s -> same(() -> System.out.println(s)))
-            .build();
+        final ReceiveBuilder<TaskCommand> builder = this.newReceiveBuilder();
+
+        // CLOSE
+        builder
+            // task start, state to TaskInitState
+            .onMessage(TaskStartCommand.class, this::isClose, c -> this.handleCommand(() -> service.handleCommand(c, (TaskCloseState) state)));
+
+        // INIT
+        builder
+            // task working, state to TaskWorkingState
+            .onMessage(TaskWorkCommand.class, this::isInit, c -> this.handleCommand(() -> service.handleCommand(c, (TaskInitState) state)));
+
+        // WORKING
+        builder
+            // task start, state to TaskCloseState
+            .onMessage(TaskStopCommand.class, this::isWorking, c -> this.handleCommand(() -> service.handleCommand(c, (TaskWorkingState) state)));
+
+        builder
+            // other command
+            .onAnyMessage(c -> this.handleCommand(() -> service.handleCommand(c, state)));
+        return builder.build();
+    }
+
+    /**
+     * common handle, user only need to impl bizService
+     *
+     * @param stateSupplier supplier produce state
+     * @return behavior[taskCommand]
+     */
+    private Behavior<TaskCommand> handleCommand(Supplier<TaskState> stateSupplier) {
+        this.state = stateSupplier.get();
+        return Behaviors.same();
+    }
+
+    private boolean isInit(TaskCommand command) {
+        return this.state instanceof TaskInitState;
+    }
+
+    private boolean isWorking(TaskCommand command) {
+        return this.state instanceof TaskWorkingState;
+    }
+
+    private boolean isClose(TaskCommand command) {
+        return this.state instanceof TaskCloseState;
     }
 }

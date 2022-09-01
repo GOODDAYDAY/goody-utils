@@ -10,6 +10,8 @@ import akka.cluster.typed.SingletonActor;
 import com.goody.utils.longjing.akka.actor.TaskActor;
 import com.goody.utils.longjing.akka.actor.TaskBActor;
 import com.goody.utils.longjing.akka.command.TaskCommand;
+import com.goody.utils.longjing.akka.service.ITaskActorService;
+import com.goody.utils.longjing.akka.util.AkkaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -49,13 +51,17 @@ public class System {
     }
 
     @Bean("taskActor")
-    public ActorRef<TaskCommand> taskActor(ClusterSingleton singleton) {
-        return singleton.init(SingletonActor.of(TaskActor.create(), "taskActor"));
+    public ActorRef<TaskCommand> taskActor(ClusterSingleton singleton, ITaskActorService service) {
+        return singleton.init(
+            SingletonActor.of(AkkaUtil.create(context -> new TaskActor(context, service, "init")),
+                "taskActor"));
     }
 
     @Bean("taskBActor")
-    public ActorRef<TaskCommand> taskBActor(ClusterSingleton singleton) {
-        return singleton.init(SingletonActor.of(TaskBActor.create(), "taskBActor"));
+    public ActorRef<TaskCommand> taskBActor(ClusterSingleton singleton, ITaskActorService service) {
+        return singleton.init(
+            SingletonActor.of(AkkaUtil.create(context -> new TaskBActor(context, service, "init")),
+                "taskBActor"));
     }
 
     /**
@@ -64,7 +70,8 @@ public class System {
      * @param taskId task id
      * @return ref
      */
-    public ActorRef<TaskCommand> taskActor(Long taskId) {
-        return this.goodyActorSystemClusterSingleton.init(SingletonActor.of(TaskActor.create(), String.format("taskActor/%s", taskId)));
+    public ActorRef<TaskCommand> taskActor(Long taskId, ITaskActorService service) {
+        return this.goodyActorSystemClusterSingleton.init(SingletonActor.of(AkkaUtil.create(context -> new TaskBActor(context, service, "init")),
+            String.format("taskActor/%s", taskId)));
     }
 }
