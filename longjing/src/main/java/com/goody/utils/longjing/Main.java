@@ -1,7 +1,7 @@
 package com.goody.utils.longjing;
 
 import akka.actor.typed.ActorRef;
-import com.goody.utils.longjing.akka.command.TaskCommand;
+import com.goody.utils.longjing.akka.base.TaskCommand;
 import com.goody.utils.longjing.akka.command.TaskStartCommand;
 import com.goody.utils.longjing.akka.command.TaskStopCommand;
 import com.goody.utils.longjing.akka.command.TaskWorkCommand;

@@ -1,4 +1,4 @@
-package com.goody.utils.longjing.akka.command;
+package com.goody.utils.longjing.akka.base;
 
 /**
  * base taskCommand

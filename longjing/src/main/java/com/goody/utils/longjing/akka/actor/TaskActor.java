@@ -6,14 +6,14 @@ import akka.actor.typed.javadsl.ActorContext;
 import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import akka.actor.typed.javadsl.ReceiveBuilder;
-import com.goody.utils.longjing.akka.command.TaskCommand;
+import com.goody.utils.longjing.akka.base.TaskCommand;
+import com.goody.utils.longjing.akka.base.TaskState;
 import com.goody.utils.longjing.akka.command.TaskStartCommand;
 import com.goody.utils.longjing.akka.command.TaskStopCommand;
 import com.goody.utils.longjing.akka.command.TaskWorkCommand;
 import com.goody.utils.longjing.akka.service.ITaskActorService;
 import com.goody.utils.longjing.akka.state.TaskCloseState;
 import com.goody.utils.longjing.akka.state.TaskInitState;
-import com.goody.utils.longjing.akka.state.TaskState;
 import com.goody.utils.longjing.akka.state.TaskWorkingState;
 
 import java.util.function.Supplier;

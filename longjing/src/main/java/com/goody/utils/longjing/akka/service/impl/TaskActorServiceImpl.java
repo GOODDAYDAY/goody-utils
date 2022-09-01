@@ -1,12 +1,12 @@
 package com.goody.utils.longjing.akka.service.impl;
 
+import com.goody.utils.longjing.akka.base.TaskState;
 import com.goody.utils.longjing.akka.command.TaskStartCommand;
 import com.goody.utils.longjing.akka.command.TaskStopCommand;
 import com.goody.utils.longjing.akka.command.TaskWorkCommand;
 import com.goody.utils.longjing.akka.service.ITaskActorService;
 import com.goody.utils.longjing.akka.state.TaskCloseState;
 import com.goody.utils.longjing.akka.state.TaskInitState;
-import com.goody.utils.longjing.akka.state.TaskState;
 import com.goody.utils.longjing.akka.state.TaskWorkingState;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

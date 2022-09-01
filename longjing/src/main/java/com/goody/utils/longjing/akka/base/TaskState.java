@@ -1,4 +1,4 @@
-package com.goody.utils.longjing.akka.state;
+package com.goody.utils.longjing.akka.base;
 
 /**
  * task base state

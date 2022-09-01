@@ -9,7 +9,7 @@ import akka.cluster.typed.ClusterSingleton;
 import akka.cluster.typed.SingletonActor;
 import com.goody.utils.longjing.akka.actor.TaskActor;
 import com.goody.utils.longjing.akka.actor.TaskBActor;
-import com.goody.utils.longjing.akka.command.TaskCommand;
+import com.goody.utils.longjing.akka.base.TaskCommand;
 import com.goody.utils.longjing.akka.service.ITaskActorService;
 import com.goody.utils.longjing.akka.util.AkkaUtil;
 import org.springframework.beans.factory.annotation.Autowired;

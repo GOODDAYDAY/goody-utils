@@ -1,6 +1,7 @@
 package com.goody.utils.longjing.akka.state;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.goody.utils.longjing.akka.base.TaskState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
