@@ -2,6 +2,7 @@ package com.goody.utils.dabai;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * Dabai Application
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 1.1.0
  */
 @SpringBootApplication
+@ComponentScan("com.goody")
 public class DabaiApplication {
 
     public static void main(String[] args) {

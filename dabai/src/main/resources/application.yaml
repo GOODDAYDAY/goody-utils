@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: goody-dabai
+server:
+  port: 8080
+
+dabai:
+  switch:
+    websocket: true
