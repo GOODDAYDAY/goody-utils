@@ -3,20 +3,30 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>goody-utils</artifactId>
-        <groupId>com.goody</groupId>
-        <version>${revision}</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.4</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dabai</artifactId>
     <name>dabai</name>
+    <version>${revision}</version>
 
     <properties>
+        <revision>1.0.1-SNAPSHOT</revision>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <spring-boot.version>2.7.4</spring-boot.version>
     </properties>
 
     <dependencies>
+        <!--	spring web	-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring-boot.version}</version>
+        </dependency>
     </dependencies>
 </project>

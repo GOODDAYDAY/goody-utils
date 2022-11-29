@@ -32,7 +32,6 @@ public final class Toy {
         internal_static_com_goody_utils_maojian_People_descriptor,
         new java.lang.String[]{"Value", "Age",});
   }
-
   private Toy() {}
 
   public static void registerAllExtensions(

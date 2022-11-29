@@ -14,17 +14,16 @@ public interface PeopleOrBuilder extends
    */
   java.lang.String getValue();
 
-  /**
-   * <code>string value = 1;</code>
-   *
-   * @return The bytes for value.
-   */
-  com.google.protobuf.ByteString
-  getValueBytes();
+    /**
+     * <code>string value = 1;</code>
+     *
+     * @return The bytes for value.
+     */
+    com.google.protobuf.ByteString
+    getValueBytes();
 
   /**
    * <code>int32 age = 2;</code>
-   *
    * @return The age.
    */
   int getAge();
