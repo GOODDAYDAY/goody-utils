@@ -1,8 +1,6 @@
 package com.goody.utils.xueya.aop;
 
 import com.goody.utils.xueya.bean.XueyaApplicationContext;
-import com.sun.org.slf4j.internal.Logger;
-import com.sun.org.slf4j.internal.LoggerFactory;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -20,7 +18,6 @@ import java.util.Map;
  * @since 1.0.0
  */
 public class AopContext {
-    private static final Logger log = LoggerFactory.getLogger(AopContext.class);
     private final Map<Class<? extends Annotation>, Node> aopObject;
 
     public AopContext() {

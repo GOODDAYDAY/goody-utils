@@ -5,13 +5,12 @@
     <parent>
         <artifactId>goody-utils</artifactId>
         <groupId>com.goody</groupId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>baihao</artifactId>
     <name>baihao</name>
-    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
