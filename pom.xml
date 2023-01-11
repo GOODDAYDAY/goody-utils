@@ -16,10 +16,17 @@
         <module>longjing</module>
         <module>dabai</module>
         <module>xiaobai</module>
+        <module>houkui</module>
     </modules>
 
     <properties>
         <revision>1.0.1-SNAPSHOT</revision>
+        <mybatis-dynamic-sql.version>1.3.1</mybatis-dynamic-sql.version>
+        <mybatis-starter.version>2.1.4</mybatis-starter.version>
+        <mysql.version>8.0.23</mysql.version>
+        <okhttp.version>3.14.9</okhttp.version>
+        <okio.version>2.10.0</okio.version>
+        <sshd-tune-version>2.9.2</sshd-tune-version>
     </properties>
 
     <dependencyManagement>
@@ -35,6 +42,57 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>2.4.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>2.4.4</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- mybatis -->
+            <dependency>
+                <groupId>org.mybatis.dynamic-sql</groupId>
+                <artifactId>mybatis-dynamic-sql</artifactId>
+                <version>${mybatis-dynamic-sql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-starter.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <!-- okhttp -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>okio</artifactId>
+                        <groupId>com.squareup.okio</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${okio.version}</version>
+            </dependency>
+            <!-- ssh Tunnel -->
+            <dependency>
+                <groupId>org.apache.sshd</groupId>
+                <artifactId>sshd-core</artifactId>
+                <version>${sshd-tune-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

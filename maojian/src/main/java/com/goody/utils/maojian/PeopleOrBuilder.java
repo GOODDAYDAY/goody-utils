@@ -7,12 +7,12 @@ public interface PeopleOrBuilder extends
     // @@protoc_insertion_point(interface_extends:com.goody.utils.maojian.People)
     com.google.protobuf.MessageOrBuilder {
 
-  /**
-   * <code>string value = 1;</code>
-   *
-   * @return The value.
-   */
-  java.lang.String getValue();
+    /**
+     * <code>string value = 1;</code>
+     *
+     * @return The value.
+     */
+    java.lang.String getValue();
 
     /**
      * <code>string value = 1;</code>
@@ -22,9 +22,10 @@ public interface PeopleOrBuilder extends
     com.google.protobuf.ByteString
     getValueBytes();
 
-  /**
-   * <code>int32 age = 2;</code>
-   * @return The age.
-   */
-  int getAge();
+    /**
+     * <code>int32 age = 2;</code>
+     *
+     * @return The age.
+     */
+    int getAge();
 }

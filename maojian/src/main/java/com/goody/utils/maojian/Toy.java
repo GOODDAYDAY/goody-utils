@@ -6,11 +6,11 @@ package com.goody.utils.maojian;
 public final class Toy {
   static final com.google.protobuf.Descriptors.Descriptor
       internal_static_com_goody_utils_maojian_People_descriptor;
-  static final
-  com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_com_goody_utils_maojian_People_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.FileDescriptor
-      descriptor;
+    static final
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internal_static_com_goody_utils_maojian_People_fieldAccessorTable;
+    private static com.google.protobuf.Descriptors.FileDescriptor
+        descriptor;
 
   static {
     java.lang.String[] descriptorData = {
@@ -21,16 +21,16 @@ public final class Toy {
             "PeopleB \n\027com.goody.utils.maojianB\003ToyP\001" +
             "b\006proto3"
     };
-    descriptor = com.google.protobuf.Descriptors.FileDescriptor
-        .internalBuildGeneratedFileFrom(descriptorData,
-            new com.google.protobuf.Descriptors.FileDescriptor[]{
-            });
-    internal_static_com_goody_utils_maojian_People_descriptor =
-        getDescriptor().getMessageTypes().get(0);
-    internal_static_com_goody_utils_maojian_People_fieldAccessorTable = new
-        com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_com_goody_utils_maojian_People_descriptor,
-        new java.lang.String[]{"Value", "Age",});
+      descriptor = com.google.protobuf.Descriptors.FileDescriptor
+          .internalBuildGeneratedFileFrom(descriptorData,
+              new com.google.protobuf.Descriptors.FileDescriptor[]{
+              });
+      internal_static_com_goody_utils_maojian_People_descriptor =
+          getDescriptor().getMessageTypes().get(0);
+      internal_static_com_goody_utils_maojian_People_fieldAccessorTable = new
+          com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+          internal_static_com_goody_utils_maojian_People_descriptor,
+          new java.lang.String[]{"Value", "Age",});
   }
   private Toy() {}
 
@@ -44,10 +44,10 @@ public final class Toy {
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
 
-  public static com.google.protobuf.Descriptors.FileDescriptor
-  getDescriptor() {
-    return descriptor;
-  }
+    public static com.google.protobuf.Descriptors.FileDescriptor
+    getDescriptor() {
+        return descriptor;
+    }
 
   // @@protoc_insertion_point(outer_class_scope)
 }
