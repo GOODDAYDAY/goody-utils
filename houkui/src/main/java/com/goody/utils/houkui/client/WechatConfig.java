@@ -19,7 +19,7 @@ import java.util.List;
 @Component
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "wechat")
-@PropertySource(value = "classpath:wechat.properties")
+@PropertySource(value = "classpath:wechat.properties", ignoreResourceNotFound = true)
 public class WechatConfig {
     private List<String> robots;
 }

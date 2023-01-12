@@ -5,6 +5,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ import java.time.Duration;
  * @since 1.0.1
  */
 @Service
+@ConditionalOnBean(WechatConfig.class)
 @RequiredArgsConstructor
 public class WeChatRobotClient {
     public static final okhttp3.MediaType JSON_MEDIA = MediaType.parse("application/json");

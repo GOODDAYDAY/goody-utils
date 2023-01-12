@@ -10,6 +10,7 @@ import org.apache.sshd.common.util.io.resource.ClassLoaderResource;
 import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.core.CoreModuleProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ import java.util.Collection;
  * @since 1.0.0
  */
 @Configuration
+@ConditionalOnBean(SshConfig.class)
 @RequiredArgsConstructor
 @Slf4j
 public class SshTunnel {

@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "ssh")
-@PropertySource(value = "classpath:ssh.properties")
+@PropertySource(value = "classpath:ssh.properties", ignoreResourceNotFound = true)
 public class SshConfig {
 
     private List<Item> list;
