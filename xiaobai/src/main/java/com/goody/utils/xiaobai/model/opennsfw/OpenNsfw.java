@@ -35,9 +35,10 @@ public class OpenNsfw {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        System.out.println("pic 1024 * 1536");
         for (int i = 1; i < 17; i++) {
             System.out.println("---------------------" + i + " start----------------------------");
-            final int count = i * 5;
+            final int count = 70;
             final ThreadPoolExecutor executor = new ThreadPoolExecutor(i, i, 60000, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<>(count));
             final CountDownLatch cdl = new CountDownLatch(count);
             for (int j = 0; j < count; j++) {

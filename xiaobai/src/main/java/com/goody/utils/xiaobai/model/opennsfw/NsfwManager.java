@@ -12,6 +12,7 @@ import org.tensorflow.types.UInt8;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 
 public class NsfwManager {
 
@@ -35,7 +36,10 @@ public class NsfwManager {
         try (Tensor<Float> image = this.constructAndExecuteGraphToNormalizeImage(imgBytes)) {
             float[] predictions = this.executeInceptionGraph(graphDef, image);
             prediction = predictions[1];
-            System.out.println("executeInceptionGraph-consuming : " + (System.currentTimeMillis() - l) + " ms" + " prediction: " + prediction);
+            long now = System.currentTimeMillis();
+            System.out.println(String.format("start:%s end: %s cost: %s prediction: %s ---- start: %s end: %s",
+                l, now, now - l, prediction, new Date(l), new Date(now)
+            ));
         }
 
         return prediction;
