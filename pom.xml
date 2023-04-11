@@ -17,6 +17,7 @@
         <module>dabai</module>
         <module>xiaobai</module>
         <module>houkui</module>
+        <module>puer</module>
     </modules>
 
     <properties>
