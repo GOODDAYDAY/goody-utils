@@ -1,0 +1,35 @@
+server:
+  port: 50001
+spring:
+  application:
+    name: api-backend-gateway
+    main:
+      allow-bean-definition-overriding: true
+  # 国际化
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: true
+    use-code-as-default-message: true
+  datasource:
+    url: jdbc:mysql://${encrypt.mysql.host}:${encrypt.mysql.port}/${encrypt.mysql.dbname}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Hong_Kong&characterEncoding=UTF-8
+    username: ${encrypt.mysql.username}
+    password: ${encrypt.mysql.password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 20
+  # 跨域配置
+  cloud:
+    gateway:
+      routes:
+        - id
+
+# 动态监听的router dataId
+dynamic-router:
+  data-id: router.yaml
+
+#日志级别
+logging:
+  level:
+    root: WARN
