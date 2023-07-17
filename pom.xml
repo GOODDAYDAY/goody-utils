@@ -21,6 +21,7 @@
         <module>yinzhen</module>
         <module>jinjunmei-client</module>
         <module>jinjunmei-server</module>
+        <module>zisun</module>
     </modules>
 
     <properties>
@@ -33,6 +34,7 @@
         <sshd-tune-version>2.9.2</sshd-tune-version>
         <spring-cloud-starter-bootstrap.version>3.0.2</spring-cloud-starter-bootstrap.version>
         <spring-cloud.netflix.version>2.2.10.RELEASE</spring-cloud.netflix.version>
+        <mybatis.version>1.4.0</mybatis.version>
     </properties>
 
     <dependencyManagement>

@@ -15,4 +15,5 @@
 | xiaobai   | prictice                           |
 | xueya     | self spring                        |
 | yinzhen   | spring gateway                     |
+| zisun     | mybatis custom plugin              |
 
