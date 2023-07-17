@@ -1,0 +1,17 @@
+server:
+  port: 50012
+spring:
+  application:
+    name: jinjunmei-server
+    main:
+      allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
+
+#日志级别
+logging:
+  level:
+    root: INFO

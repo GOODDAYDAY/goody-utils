@@ -1,0 +1,43 @@
+server:
+  port: 50001
+spring:
+  application:
+    name: jinjunmei-client
+    main:
+      allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
+
+feign:
+  circuitbreaker:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 10000
+        readTimeout: 10000
+
+resilience4j.circuitbreaker:
+  configs:
+    default:
+      registerHealthIndicator: true
+      slidingWindowSize: 60
+
+resilience4j.timelimiter:
+  configs:
+    default:
+      timeoutDuration: 1s
+      cancelRunningFuture: true
+
+#日志级别
+logging:
+  level:
+    root: INFO
+
+
+jinjunmei:
+  server:
+    jinjunmei-server

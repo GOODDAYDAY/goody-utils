@@ -1,0 +1,32 @@
+spring:
+  profiles:
+    # [dev, staging, production]
+    active: dev
+  cloud:
+    # Nacos config
+    nacos:
+      discovery:
+        enabled: true
+        register-enabled: true
+        ephemeral: true
+      config:
+        enabled: true
+        # 命名空间
+        namespace: jinjunmei
+        # 动态配置
+        extension-configs:
+          # application
+          - data-id: application.yaml
+            refresh: true
+
+---
+# 开发环境dev
+spring:
+  config:
+    activate:
+      on-profile: dev
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username: nacos
+      password: nacos
