@@ -21,6 +21,7 @@
         <plugin type="org.mybatis.generator.plugins.FluentBuilderMethodsPlugin"/>
         <plugin type="com.goody.utils.zisun.InsertIgnoreIntoPlugin"/>
         <plugin type="com.goody.utils.zisun.InsertOnDuplicateKeyPlugin"/>
+        <plugin type="com.goody.utils.zisun.ReplaceIntoPlugin"/>
 
         <commentGenerator>
             <!-- 添加数据库注释到生成的代码 -->

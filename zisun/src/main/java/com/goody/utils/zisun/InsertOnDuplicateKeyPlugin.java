@@ -60,7 +60,7 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         final String columnValueNames = introspectedTable.getAllColumns()
             .stream()
-            .map(column -> String.format("#{item.%s}", column.getActualColumnName()))
+            .map(column -> String.format("#{item.%s}", column.getJavaProperty()))
             .collect(Collectors.joining(", "));
         final String baseColumnValues = introspectedTable.getBaseColumns()
             .stream()
@@ -68,12 +68,12 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         String insertOnDuplicateKey = String.format("@Insert({" +
             "\"<script>\" +\n" +
-            "            \"INSERT INTO %s\" +\n" +
+            "            \" INSERT INTO %s\" +\n" +
             "              \"(%s)\" +\n" +
-            "            \"VALUES\" +\n" +
+            "            \" VALUES\" +\n" +
             "              \"(%s)\" +\n" +
-            "            \"AS r\" +\n" +
-            "            \"ON DUPLICATE KEY UPDATE\" +\n" +
+            "            \" AS r\" +\n" +
+            "            \" ON DUPLICATE KEY UPDATE\" +\n" +
             "            \"  %s\" +\n" +
             "        \"</script>\"" +
             "})", tableName, columnNames, columnValueNames, baseColumnValues);
@@ -103,7 +103,7 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         final String columnValueNames = introspectedTable.getAllColumns()
             .stream()
-            .map(column -> String.format("#{item.%s}", column.getActualColumnName()))
+            .map(column -> String.format("#{item.%s}", column.getJavaProperty()))
             .collect(Collectors.joining(", "));
         final String baseColumnValues = introspectedTable.getBaseColumns()
             .stream()
@@ -111,14 +111,14 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         String insertOnDuplicateKey = String.format("@Insert({" +
             "\"<script>\" +\n" +
-            "            \"INSERT IGNORE INTO %s\" +\n" +
-            "            \"(%s)\" +\n" +
-            "            \"values\" +\n" +
+            "            \" INSERT INTO %s\" +\n" +
+            "            \" (%s)\" +\n" +
+            "            \" values\" +\n" +
             "            \"<foreach collection='items' item='item' separator=','>\" +\n" +
             "               \"(%s)\" +\n" +
             "            \"</foreach> \" +\n" +
-            "            \"AS r\" +\n" +
-            "            \"ON DUPLICATE KEY UPDATE\" +\n" +
+            "            \" AS r\" +\n" +
+            "            \" ON DUPLICATE KEY UPDATE\" +\n" +
             "            \"  %s\" +\n" +
             "        \"</script>\"" +
             "})", tableName, columnNames, columnValueNames, baseColumnValues);

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * @version 1.0, 2023/7/17
  * @since 1.0.0
  */
-public class InsertIgnoreIntoPlugin extends PluginAdapter {
+public class ReplaceIntoPlugin extends PluginAdapter {
 
     @Override
     public boolean validate(List<String> warnings) {
@@ -47,7 +47,7 @@ public class InsertIgnoreIntoPlugin extends PluginAdapter {
         parameters.addAnnotation("@Param(\"item\")");
 
         // void insertIgnoreCustom() {}
-        final Method method = new Method("insertIgnoreCustom");
+        final Method method = new Method("replaceIntoCustom");
         // void insertIgnoreCustom();
         method.setAbstract(true);
         // void insertIgnoreCustom(@Param("item") Collection<Clazz> records);
@@ -64,7 +64,7 @@ public class InsertIgnoreIntoPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         String insertIgnore = String.format("@Insert({" +
             "\"<script>\" +\n" +
-            "            \" INSERT IGNORE INTO %s\" +\n" +
+            "            \" REPLACE INTO %s\" +\n" +
             "              \" (%s)\" +\n" +
             "            \" VALUES\" +\n" +
             "              \"(%s)\" +\n" +
@@ -83,7 +83,7 @@ public class InsertIgnoreIntoPlugin extends PluginAdapter {
         parameters.addAnnotation("@Param(\"items\")");
 
         // void insertIgnoreBatchCustom() {}
-        final Method method = new Method("insertIgnoreBatchCustom");
+        final Method method = new Method("replaceIntoBatchCustom");
         // void insertIgnoreBatchCustom();
         method.setAbstract(true);
         // void insertIgnoreBatchCustom(@Param("items") Collection<Clazz> records);
@@ -100,7 +100,7 @@ public class InsertIgnoreIntoPlugin extends PluginAdapter {
             .collect(Collectors.joining(", "));
         String insertIgnore = String.format("@Insert({" +
             "\"<script>\" +\n" +
-            "            \" INSERT IGNORE INTO %s\" +\n" +
+            "            \" REPLACE INTO %s\" +\n" +
             "            \" (%s)\" +\n" +
             "            \" VALUES\" +\n" +
             "            \"<foreach collection='items' item='item' separator=','>\" +\n" +
