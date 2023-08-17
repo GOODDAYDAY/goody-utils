@@ -1,6 +1,5 @@
 package com.goody.utils.zisun;
 
-import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
@@ -56,7 +55,7 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
         final String tableName = introspectedTable.getFullyQualifiedTableNameAtRuntime();
         final String columnNames = introspectedTable.getAllColumns()
             .stream()
-            .map(IntrospectedColumn::getActualColumnName)
+            .map(column -> String.format("`%s`", column.getActualColumnName()))
             .collect(Collectors.joining(", "));
         final String columnValueNames = introspectedTable.getAllColumns()
             .stream()
@@ -99,7 +98,7 @@ public class InsertOnDuplicateKeyPlugin extends PluginAdapter {
         final String tableName = introspectedTable.getFullyQualifiedTableNameAtRuntime();
         final String columnNames = introspectedTable.getAllColumns()
             .stream()
-            .map(IntrospectedColumn::getActualColumnName)
+            .map(column -> String.format("`%s`", column.getActualColumnName()))
             .collect(Collectors.joining(", "));
         final String columnValueNames = introspectedTable.getAllColumns()
             .stream()
