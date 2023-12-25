@@ -38,6 +38,28 @@ public class SampleCheckerHandlerImpl implements IValueCheckerHandler {
     public void verify() {
     }
 
+    public void verifyPutThreadValue(String name) {
+        // set default value with method get
+        ValueCheckerReentrantThreadLocal.getOrDefault(String.class, name);
+
+        // verify value
+        if (!ValueCheckerReentrantThreadLocal.getOrDefault(String.class, "").equals(name)) {
+            throw new ValueIllegalException("error");
+        }
+    }
+
+    public void verifyGetRightThreadValue(String name) {
+        if (!ValueCheckerReentrantThreadLocal.getOrDefault(String.class, name).equals(name)) {
+            throw new ValueIllegalException("error");
+        }
+    }
+
+    public void verifyGetWrongThreadValue(String name) {
+        if (!ValueCheckerReentrantThreadLocal.getOrDefault(String.class, "").equals(name)) {
+            throw new ValueIllegalException("error");
+        }
+    }
+
     public void verifyError() {
         throw new ValueIllegalException("error");
     }

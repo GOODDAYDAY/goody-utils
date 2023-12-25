@@ -52,10 +52,17 @@ public class ValueCheckerAspect {
      */
     @Around("handleValueCheckerPoint() && @annotation(valueCheckers)")
     public Object around(ProceedingJoinPoint point, ValueCheckers valueCheckers) throws Throwable {
-        for (ValueCheckers.ValueChecker checker : valueCheckers.checkers()) {
-            valueCheck(checker, point);
+        try {
+            // init ThreadLocal, if init in sub ValueChecker, ThreadLocal will counter++
+            ValueCheckerReentrantThreadLocal.init();
+            for (ValueCheckers.ValueChecker checker : valueCheckers.checkers()) {
+                valueCheck(checker, point);
+            }
+            return point.proceed();
+        } finally {
+            // clear ThreadLocal, if clear in sub ValueChecker, ThreadLocal will counter--
+            ValueCheckerReentrantThreadLocal.clear();
         }
-        return point.proceed();
     }
 
     private void valueCheck(ValueCheckers.ValueChecker checker, ProceedingJoinPoint point) throws InvocationTargetException, IllegalAccessException {
