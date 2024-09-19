@@ -1,5 +1,8 @@
 server:
   port: 50012
+  tomcat:
+    maxThreads: 1
+    minSpareThreads: 1
 spring:
   application:
     name: jinjunmei-server
@@ -10,7 +13,9 @@ spring:
       server-addr: 127.0.0.1:8848
       username: nacos
       password: nacos
-
+  servlet:
+    properties:
+      threadCount: 1
 #日志级别
 logging:
   level:

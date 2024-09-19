@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+    <!--classPathEntry:数据库的JDBC驱动,换成你自己的驱动位置 可选 -->
+    <classPathEntry
+            location="${user.home}/.m2/repository/mysql/mysql-connector-java/8.0.23/mysql-connector-java-8.0.23.jar"/>
+
+    <context id="backendTables" defaultModelType="conditional" targetRuntime="MyBatis3">
+        <!-- 数据库关键字冲突,自动处理 -->
+        <property name="autoDelimitKeywords" value="true"/>
+        <!-- 用反引号`包裹,默认是双引号" -->
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.FluentBuilderMethodsPlugin"/>
+        <plugin type="com.goody.utils.zisun.InsertIgnoreIntoPlugin"/>
+        <plugin type="com.goody.utils.zisun.InsertOnDuplicateKeyPlugin"/>
+        <plugin type="com.goody.utils.zisun.ReplaceIntoPlugin"/>
+
+        <commentGenerator>
+            <!-- 添加数据库注释到生成的代码 -->
+            <property name="addRemarkComments" value="true"/>
+            <!-- 不生成日期 -->
+            <property name="suppressDate" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/toy?allowPublicKeyRetrieval=true"
+                        userId="root"
+                        password="123456">
+            <property name="useSSL" value="false"/>
+            <property name="serverTimezone" value="Asia/Hong_Kong"/>
+            <!--MySQL 不支持 schema 或者 catalog 所以需要添加这个，作用就是只生成指定数据库的 -->
+            <!--参考 : http://www.mybatis.org/generator/usage/mysql.html -->
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="true"/>
+            <!-- time field use LocalDate etc -->
+            <property name="useJSR310Types" value="true"/>
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="com.goody.utils.zisun.demo.entity" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- 需要生成XML时才有效 -->
+        <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator type="ANNOTATEDMAPPER" targetPackage="com.goody.utils.zisun.demo.dao"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <table schema="toy" tableName="toy" domainObjectName="ToyCustom">
+            <property name="useActualColumnNames" value="false"/>
+        </table>
+    </context>
+
+</generatorConfiguration>

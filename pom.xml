@@ -17,11 +17,13 @@
         <module>dabai</module>
         <module>xiaobai</module>
         <module>houkui</module>
+        <module>huangshan</module>
         <module>puer</module>
         <module>yinzhen</module>
         <module>jinjunmei-client</module>
         <module>jinjunmei-server</module>
         <module>zisun</module>
+        <module>tianjian</module>
     </modules>
 
     <properties>
