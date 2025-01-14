@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * 拼接图片工具类
+ * util for image join together
  *
  * @author Goody
  * @version 1.0, 2023/09/14
@@ -29,10 +29,10 @@ public final class ImageJoinerUtil {
     }
 
     /**
-     * 将输入密集拼接为一张图片
+     * combine all images into one image
      *
-     * @param files 文件列表
-     * @return 默认byteArray输出流
+     * @param files files
+     * @return byteArray output stream
      */
     public static OutputStream imageCombineFiles(Collection<File> files) {
         return imageCombine(files.stream().map(is -> {
@@ -47,10 +47,11 @@ public final class ImageJoinerUtil {
     }
 
     /**
-     * 将输入密集拼接为一张图片
+     * combine all images into one image
      *
-     * @param files 文件列表
-     * @return 默认byteArray输出流
+     * @param files files
+     * @param os    output stream
+     * @return byteArray output stream
      */
     public static OutputStream imageCombineFiles(Collection<File> files, OutputStream os) {
         return imageCombine(files.stream().map(is -> {
@@ -66,10 +67,10 @@ public final class ImageJoinerUtil {
     }
 
     /**
-     * 将输入密集拼接为一张图片
+     * combine all images into one image
      *
-     * @param imageIss 图片输入流
-     * @return 默认byteArray输出流
+     * @param imageIss files
+     * @return byteArray output stream
      */
     public static OutputStream imageCombine(Collection<InputStream> imageIss) {
         return imageCombine(imageIss, new ByteArrayOutputStream());

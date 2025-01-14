@@ -12,6 +12,7 @@
 | maojian   | utils with google-protobuf         |
 | puer      | ai model                           |
 | qianliang | lombok test                        |
+| tianjian  | mybatis                               |
 | xiaobai   | prictice                           |
 | xueya     | self spring                        |
 | yinzhen   | spring gateway                     |
