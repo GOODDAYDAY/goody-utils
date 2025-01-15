@@ -11,10 +11,15 @@ import org.opencv.imgproc.Imgproc;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 
 /**
  * 校验图片是否存在目标模板类
@@ -29,14 +34,17 @@ public class ImageRecognitionUtil {
 
         if (osName.contains("win")) {
             // Windows 系统
-            libPath = ImageRecognitionUtil.class.getResource("/opencv/opencv_java490.dll").getPath();
+            libPath = extractOpenCVLibrary("opencv_java490.dll");
         } else if (osName.contains("linux")) {
             // Linux 系统
-            libPath = ImageRecognitionUtil.class.getResource("/opencv/libopencv_java490.so").getPath();
+            libPath = extractOpenCVLibrary("libopencv_java490.so");
         } else {
             throw new UnsupportedOperationException("Unsupported operating system: " + osName);
         }
 
+        if (null == libPath) {
+            throw new UnsupportedOperationException("file not exist " + osName);
+        }
         System.load(libPath);
     }
 
@@ -187,5 +195,40 @@ public class ImageRecognitionUtil {
             }
             return image;
         }
+    }
+
+    private static String extractOpenCVLibrary(String libName) {
+        URL libUrl = ImageRecognitionUtil.class.getResource("/opencv/" + libName);
+        if (libUrl == null) {
+            return null;
+        }
+
+        try {
+            Path tempDir = Files.createTempDirectory("native-libs-");
+            Path libFile = tempDir.resolve(libName);
+
+            try (InputStream in = libUrl.openStream();
+                 FileOutputStream out = new FileOutputStream(libFile.toFile())) {
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, read);
+                }
+            }
+
+            // 设置可执行权限
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                // Windows系统
+                File file = libFile.toFile();
+                file.setExecutable(true, false);
+            } else {
+                // Unix/Linux系统
+                Files.setPosixFilePermissions(libFile, PosixFilePermissions.fromString("rwxr-xr-x"));
+            }
+            return libFile.toAbsolutePath().toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
