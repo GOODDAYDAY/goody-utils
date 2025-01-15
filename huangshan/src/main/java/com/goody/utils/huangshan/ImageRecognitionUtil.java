@@ -1,5 +1,6 @@
 package com.goody.utils.huangshan;
 
+import lombok.extern.slf4j.Slf4j;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -15,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,102 +27,99 @@ import java.nio.file.attribute.PosixFilePermissions;
  * @author Haotian
  * @version 1.0, 2025/1/10
  */
+@Slf4j
 public class ImageRecognitionUtil {
+
     static {
         String osName = System.getProperty("os.name").toLowerCase();
-        String libPath = "";
+        String libPath = null;
 
         if (osName.contains("win")) {
-            // Windows 系统
+            // Windows 系统。该dll有50MB，较大，后续可以考虑删除
             libPath = extractOpenCVLibrary("opencv_java490.dll");
         } else if (osName.contains("linux")) {
             // Linux 系统
             libPath = extractOpenCVLibrary("libopencv_java490.so");
         } else {
-            throw new UnsupportedOperationException("Unsupported operating system: " + osName);
+            // 不能因为不支持mac就不允许启动
+            log.warn("mac系统暂不支持opencv");
         }
 
         if (null == libPath) {
-            throw new UnsupportedOperationException("file not exist " + osName);
+            log.warn("opencv-lib装载失败");
+        } else {
+            System.load(libPath);
         }
-        System.load(libPath);
-    }
-
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        System.out.println(matchWechatGroupByUrl("https://dev-cdn-common.bcmcdn.com/dev/403/20250114105013"));
     }
 
     public static boolean matchWechatGroupByPath(String srcPath) {
-        // 读取指定图片和目标图片
-        Mat src = Imgcodecs.imread(srcPath);
-        Mat template = null;
-        try {
-            template = matFromJar("/template/group-detail@3x.png");
-            return match(src, template);
-        } catch (IOException e) {
+        try (
+            // 读取指定图片和目标图片，此处创建对象，保证对象必须存在，下文match对内容判空
+            AutoCloseableMat src = new AutoCloseableMat(Imgcodecs.imread(srcPath));
+            AutoCloseableMat template = new AutoCloseableMat(loadTemplate());
+        ) {
+            return match(src.getMat(), template.getMat());
         }
-        return false;
-    }
-
-    public static boolean matchWechatGroupByPath(String srcPath, String templatePath) {
-        // 读取指定图片和目标图片
-        Mat src = Imgcodecs.imread(srcPath);
-        Mat template = Imgcodecs.imread(templatePath);
-        return match(src, template);
     }
 
     public static boolean matchWechatGroupByUrl(String srcUrl) {
-        // 读取指定图片和目标图片
-        Mat src = matFromUrl(srcUrl);
-        if (src == null) {
-            return false;
+        try (
+            // 读取指定图片和目标图片
+            AutoCloseableMat src = new AutoCloseableMat(matFromUrl(srcUrl));
+            AutoCloseableMat template = new AutoCloseableMat(loadTemplate());
+        ) {
+            return match(src.getMat(), template.getMat());
         }
-        Mat template = null;
-        try {
-            template = matFromJar("/template/group-detail@3x.png");
-            return match(src, template);
-        } catch (IOException e) {
-        }
-        return false;
     }
 
-    public static boolean matchWechatGroupByUrl(String srcUrl, String templatePath) {
-        // 读取指定图片和目标图片
-        Mat src = matFromUrl(srcUrl);
-        if (src == null) {
-            return false;
+    public static boolean matchByPath(String srcPath, String templatePath) {
+        try (
+            // 读取指定图片和目标图片
+            AutoCloseableMat src = new AutoCloseableMat(Imgcodecs.imread(srcPath));
+            AutoCloseableMat template = new AutoCloseableMat(Imgcodecs.imread(templatePath));
+        ) {
+            return match(src.getMat(), template.getMat());
         }
-        Mat template = Imgcodecs.imread(templatePath);
-        return match(src, template);
+    }
+
+    public static boolean matchGroupByUrl(String srcUrl, String templatePath) {
+        try (
+            // 读取指定图片和目标图片
+            AutoCloseableMat src = new AutoCloseableMat(matFromUrl(srcUrl));
+            AutoCloseableMat template = new AutoCloseableMat(Imgcodecs.imread(templatePath));
+        ) {
+            return match(src.getMat(), template.getMat());
+        }
     }
 
     public static boolean match(Mat src, Mat template) {
+        if (null == src || null == template) {
+            return false;
+        }
         for (double scaleValue = 0.2; scaleValue < 1.2; scaleValue += 0.05) {
-            // 缩放模板
-            Mat resizedTemplate = new Mat();
-            Imgproc.resize(template, resizedTemplate, new Size(), scaleValue, scaleValue);
+            try (
+                // 缩放模板
+                AutoCloseableMat autoCloseableResizedTemplate = new AutoCloseableMat();
+                AutoCloseableMat autoCloseableResult = new AutoCloseableMat();
+            ) {
+                Mat resizedTemplate = autoCloseableResizedTemplate.getMat();
+                Imgproc.resize(template, resizedTemplate, new Size(), scaleValue, scaleValue);
 
-            // 检查缩放后的模板尺寸是否小于源图像尺寸
-            if (resizedTemplate.rows() > src.rows() || resizedTemplate.cols() > src.cols()) {
-                continue;
-            }
+                // 检查缩放后的模板尺寸是否小于源图像尺寸
+                if (resizedTemplate.rows() > src.rows() || resizedTemplate.cols() > src.cols()) {
+                    continue;
+                }
 
-            final boolean match = isMatch(src, resizedTemplate, scaleValue);
-
-            if (match) {
-                // 释放资源
-                src.release();
-                template.release();
-                return true;
+                final boolean match = isMatch(autoCloseableResult.getMat(), src, resizedTemplate);
+                if (match) {
+                    return true;
+                }
             }
         }
-        // 释放资源
-        src.release();
-        template.release();
         return false;
     }
 
-    private static boolean isMatch(Mat src, Mat resizedTemplate, double scaleValue) {
+    private static boolean isMatch(Mat result, Mat src, Mat resizedTemplate) {
         // 设置匹配阈值
         double threshold = 0.9;
         // 多尺度匹配
@@ -130,7 +127,6 @@ public class ImageRecognitionUtil {
         double maxVal = 0;
 
         // 创建匹配结果矩阵
-        Mat result = new Mat();
         int result_cols = src.cols() - resizedTemplate.cols() + 1;
         int result_rows = src.rows() - resizedTemplate.rows() + 1;
         result.create(result_rows, result_cols, CvType.CV_32FC1);
@@ -141,10 +137,6 @@ public class ImageRecognitionUtil {
         // 查找匹配结果中的最大值位置
         Core.MinMaxLocResult mmr = Core.minMaxLoc(result);
         double currentMaxVal = mmr.maxVal;
-
-        // 释放资源
-        result.release();
-        resizedTemplate.release();
 
         // 更新最佳匹配结果
         if (currentMaxVal > maxVal) {
@@ -165,7 +157,16 @@ public class ImageRecognitionUtil {
             byte[] byteArray = baos.toByteArray();
             return Imgcodecs.imdecode(new MatOfByte(byteArray), Imgcodecs.IMREAD_COLOR);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn("url资源下载失败 {}", url, e);
+            return null;
+        }
+    }
+
+    public static Mat loadTemplate() {
+        try {
+            return matFromJar("/template/group-detail@3x.png");
+        } catch (IOException e) {
+            log.warn("Template资源未找到", e);
             return null;
         }
     }
@@ -174,7 +175,8 @@ public class ImageRecognitionUtil {
         // 使用类加载器获取资源的输入流
         try (InputStream inputStream = ImageRecognitionUtil.class.getResourceAsStream(resourcePath)) {
             if (inputStream == null) {
-                throw new IOException("资源未找到: " + resourcePath);
+                log.warn("资源未找到 {}", resourcePath);
+                return null;
             }
 
             // 将 InputStream 转换为 byte 数组
@@ -191,7 +193,8 @@ public class ImageRecognitionUtil {
             Mat image = Imgcodecs.imdecode(mob, Imgcodecs.IMREAD_COLOR);
 
             if (image.empty()) {
-                throw new IOException("无法解码图像: " + resourcePath);
+                log.warn("无法解码图像 {}", resourcePath);
+                return null;
             }
             return image;
         }
@@ -200,6 +203,7 @@ public class ImageRecognitionUtil {
     private static String extractOpenCVLibrary(String libName) {
         URL libUrl = ImageRecognitionUtil.class.getResource("/opencv/" + libName);
         if (libUrl == null) {
+            log.warn("lib 资源未找到 {}", libName);
             return null;
         }
 
@@ -227,7 +231,7 @@ public class ImageRecognitionUtil {
             }
             return libFile.toAbsolutePath().toString();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("opencv装载失败 {}", libName, e);
         }
         return null;
     }
