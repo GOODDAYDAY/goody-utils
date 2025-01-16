@@ -38,8 +38,30 @@ public class ImageRecognitionUtil {
             // Windows 系统。该dll有50MB，较大，后续可以考虑删除
             libPath = extractOpenCVLibrary("opencv_java490.dll");
         } else if (osName.contains("linux")) {
-            // Linux 系统
-            libPath = extractOpenCVLibrary("libopencv_java490.so");
+            // Linux 系统，经验证，无法通过设置.so文件的形式处理
+            // 解决方案为，在base镜像的基础上，直接进行cmake，使镜像有该opencv依赖即可。
+            // 因为docker有cache机制，所以编译所需要的三十分钟，仅需要一次执行即可
+            // ==================== 附对应dockerfile命令，内部JAVA相关路径需要对应基础镜像内的即可 ================================
+            // RUN apt update -y && \
+            //     apt install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev -y  && \
+            //     wget -O opencv-4.9.0.zip https://github.com/opencv/opencv/archive/4.9.0.zip  && \
+            //     unzip opencv-4.9.0.zip  && \
+            //     cd opencv-4.9.0  && \
+            //     mkdir build  && \
+            //     cd build  && \
+            //     cmake -D CMAKE_BUILD_TYPE=RELEASE \
+            //           -D CMAKE_INSTALL_PREFIX=/usr/local \
+            //           -D BUILD_opencv_java=ON \
+            //           -D JAVA_AWT_LIBRARY=/usr/lib/jvm/java-8-openjdk-amd64/lib/libawt.so \
+            //           -D JAVA_JVM_LIBRARY=/usr/lib/jvm/java-8-openjdk-amd64/lib/server/libjvm.so \
+            //           -D JAVA_INCLUDE_PATH=/usr/lib/jvm/java-8-openjdk-amd64/include \
+            //           -D JAVA_INCLUDE_PATH2=/usr/lib/jvm/java-8-openjdk-amd64/include/linux \
+            //           -D JAVA_AWT_INCLUDE_PATH=/usr/lib/jvm/java-8-openjdk-amd64/include \
+            //           .. && \
+            //     make -j4 && \
+            //     make install
+            // ====================================================
+            libPath = "/usr/local/share/java/opencv4/libopencv_java490.so";
         } else {
             // 不能因为不支持mac就不允许启动
             log.warn("mac系统暂不支持opencv");
@@ -48,6 +70,7 @@ public class ImageRecognitionUtil {
         if (null == libPath) {
             log.warn("opencv-lib装载失败");
         } else {
+            log.info("lib路径 {}", libPath);
             System.load(libPath);
         }
     }

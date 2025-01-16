@@ -25,14 +25,6 @@ import java.util.stream.Stream;
  */
 public class PathUtil {
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        System.out.println(getPathsFromResource("/nologo"));
-        System.out.println(getPathsFromResource("/haveLogo"));
-        System.out.println(getAbsolutePathsFromResource("/nologo"));
-        System.out.println(getAbsolutePathsFromResource("/haveLogo"));
-    }
-
-
     public static List<String> getPathsFromResource(String resourcePath) throws IOException, URISyntaxException {
         List<String> fileNames = new ArrayList<>();
         URL url = PathUtil.class.getResource(resourcePath);
