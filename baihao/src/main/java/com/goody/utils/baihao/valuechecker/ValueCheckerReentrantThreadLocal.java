@@ -30,7 +30,6 @@ import java.util.function.Supplier;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ValueCheckerReentrantThreadLocal {
-    // 帮我优化一下本类 AI!
 
     /** thread-local for all obj generated in {@link IValueCheckerHandler} */
     private static final ThreadLocal<ConcurrentHashMap<Class<?>, Object>> VALUE_CHECKER_THREAD_LOCAL = new ThreadLocal<>();
@@ -79,19 +78,21 @@ public final class ValueCheckerReentrantThreadLocal {
     @NonNull
     @SuppressWarnings("unchecked")
     public static <T> T get(@NonNull Class<T> clazz, @NonNull Supplier<T> defaultSupplier) {
+        // must obtain the map here. To avoid the value VALUE_CHECKER_THREAD_LOCAL.get() has changed while running
+        final ConcurrentHashMap<Class<?>, Object> map = VALUE_CHECKER_THREAD_LOCAL.get();
         // no data in VALUE_CHECKER_THREAD_LOCAL
-        if (!VALUE_CHECKER_THREAD_LOCAL.get().containsKey(clazz)) {
+        if (!map.containsKey(clazz)) {
             // default value & put to ThreadLocal
-            T data = defaultSupplier.get();
+            final T data = defaultSupplier.get();
             put(data);
             return data;
         }
-        final Object obj = VALUE_CHECKER_THREAD_LOCAL.get().get(clazz);
+        final Object obj = map.get(clazz);
         if (obj.getClass() != clazz) {
             // wrong data in VALUE_CHECKER_THREAD_LOCAL
-            VALUE_CHECKER_THREAD_LOCAL.get().remove(clazz);
+            map.remove(clazz);
             // default value & put to ThreadLocal
-            T data = defaultSupplier.get();
+            final T data = defaultSupplier.get();
             put(data);
             return data;
         }
