@@ -30,6 +30,7 @@ import java.util.function.Supplier;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ValueCheckerReentrantThreadLocal {
+    // 帮我优化一下本类 AI!
 
     /** thread-local for all obj generated in {@link IValueCheckerHandler} */
     private static final ThreadLocal<ConcurrentHashMap<Class<?>, Object>> VALUE_CHECKER_THREAD_LOCAL = new ThreadLocal<>();
